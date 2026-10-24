@@ -1,7 +1,8 @@
-/* Verify Razorpay's signature after checkout, then activate the plan. */
-import crypto from "crypto";
+/* After Razorpay Checkout succeeds: verify the signature, activate the plan immediately.
+   The webhook will confirm (and keep extending) it independently. */
 import { sbAdmin } from "../../../../lib/supabase";
 import { PLANS } from "../../../../lib/plans";
+import { verifyCheckout, planUpdate } from "../../../../lib/razorpay";
 
 export async function POST(req) {
   try {
@@ -10,23 +11,14 @@ export async function POST(req) {
     const { data: u } = await db.auth.getUser(tok);
     if (!u?.user) return Response.json({ error: "Sign in first." }, { status: 401 });
 
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, plan, cycle } = await req.json();
-    const secret = process.env.RAZORPAY_KEY_SECRET;
-    const expected = crypto.createHmac("sha256", secret).update(`${razorpay_order_id}|${razorpay_payment_id}`).digest("hex");
-    if (expected !== razorpay_signature) return Response.json({ error: "Signature mismatch — payment not verified." }, { status: 400 });
+    const body = await req.json();
+    const { plan, cycle } = body;
+    if (!PLANS[plan]) return Response.json({ error: "Unknown plan." }, { status: 400 });
+    if (!verifyCheckout(body)) return Response.json({ error: "Signature mismatch — payment not verified." }, { status: 400 });
 
-    const p = PLANS[plan];
     const { data: acc } = await db.from("accounts").select("id").eq("owner_id", u.user.id).single();
-    const now = new Date();
-    const renews = new Date(now); renews.setMonth(renews.getMonth() + (cycle === "annual" ? 12 : 1));
-
-    await db.from("accounts").update({
-      plan, status: "active", billing_cycle: cycle,
-      keyword_limit: p.keywords, region_limit: p.regions,
-      plan_started: now, plan_renews: renews,
-    }).eq("id", acc.id);
-
-    await db.from("payments").update({ status: "paid", raw: { razorpay_payment_id, razorpay_signature } }).eq("provider_id", razorpay_order_id);
+    await db.from("accounts").update({ ...planUpdate(plan, cycle, null), razorpay_subscription_id: body.razorpay_subscription_id }).eq("id", acc.id);
+    await db.from("payments").update({ status: "paid", raw: { payment_id: body.razorpay_payment_id, verified_at: new Date() } }).eq("provider_id", body.razorpay_subscription_id);
     return Response.json({ ok: true });
   } catch (e) {
     return Response.json({ error: e.message || String(e) }, { status: 500 });

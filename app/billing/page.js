@@ -32,8 +32,8 @@ export default function Billing() {
     if (j.error) return setErr(j.error);
     await new Promise(r => { if (window.Razorpay) return r(); const sc = document.createElement("script"); sc.src = "https://checkout.razorpay.com/v1/checkout.js"; sc.onload = r; document.body.appendChild(sc); });
     new window.Razorpay({
-      key: j.key, order_id: j.orderId, amount: j.amount, currency: j.currency,
-      name: "RankPulse", description: `${PLANS[planKey].name} · ${cycle}`, prefill: { email: s.session.user.email }, theme: { color: "#4F46E5" },
+      key: j.key, subscription_id: j.subscriptionId,
+      name: "RankPulse", description: `${PLANS[planKey].name} · billed ${cycle}`, prefill: { email: s.session.user.email }, theme: { color: "#4F46E5" },
       handler: async resp => {
         const v = await fetch("/api/checkout/verify", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + s.session.access_token }, body: JSON.stringify({ ...resp, plan: planKey, cycle }) });
         const vj = await v.json();
