@@ -1,0 +1,41 @@
+name: RankPulse scans
+
+on:
+  schedule:
+    # 1st of every month, 02:30 UTC (08:00 IST)
+    - cron: "30 2 1 * *"
+    # every 20 minutes, to pick up scans customers queue by hand
+    - cron: "*/20 * * * *"
+  workflow_dispatch:
+    inputs:
+      monthly:
+        description: "Also queue a run for every active site"
+        type: boolean
+        default: false
+
+concurrency:
+  group: rankpulse-scan
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install @supabase/supabase-js --no-audit --no-fund
+      - name: Run scans
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          BRIGHTDATA_KEY: ${{ secrets.BRIGHTDATA_KEY }}
+          BRIGHTDATA_ZONE: ${{ secrets.BRIGHTDATA_ZONE }}
+        run: |
+          if [ "${{ github.event.schedule }}" = "30 2 1 * *" ] || [ "${{ inputs.monthly }}" = "true" ]; then
+            node worker/run.mjs --monthly
+          else
+            node worker/run.mjs
+          fi
