@@ -51,10 +51,10 @@ export function Footer() {
           <p style={{ maxWidth: "36ch", marginTop: 12, lineHeight: 1.6 }}>Real Google positions and AI-search visibility for the markets you actually sell to. Measured monthly, from in-country IPs, with nothing personalised.</p>
         </div>
         <div><h4>Product</h4><a href="/features">Features</a><a href="/aeo">AI search visibility</a><a href="/pricing">Pricing</a><a href="/compare">vs Ahrefs & Semrush</a></div>
-        <div><h4>Company</h4><a href="/about">About</a><a href="mailto:hello@rankpulse.app">Contact</a><a href="/about#method">Methodology</a></div>
-        <div><h4>Account</h4><a href="/signup">Start free</a><a href="/login">Sign in</a><a href="/dashboard">Dashboard</a></div>
+        <div><h4>Company</h4><a href="/about">About</a><a href="/contact">Contact</a><a href="/about#method">Methodology</a></div>
+        <div><h4>Legal</h4><a href="/terms">Terms of Service</a><a href="/privacy">Privacy Policy</a><a href="/refunds">Refunds &amp; Cancellation</a><a href="/login">Sign in</a></div>
       </div>
-      <div className="legal"><span>© {new Date().getFullYear()} RankPulse. Built by the team at ZentrumHub.</span><span>Prices in USD and INR · GST extra in India</span></div>
+      <div className="legal"><span>© {new Date().getFullYear()} RankPulse · ZentrumHub Technologies Pvt. Ltd., Pune, India</span><span>Prices in USD and INR · GST extra in India · Payments by Razorpay</span></div>
     </footer>
   );
 }
