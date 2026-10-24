@@ -144,7 +144,22 @@ async function processRun(run) {
 }
 
 /* ───────── main ───────── */
-if (!KEY) { console.error("BRIGHTDATA_KEY not set"); process.exit(1); }
+const missing = [
+  ["BRIGHTDATA_KEY", KEY],
+  ["NEXT_PUBLIC_SUPABASE_URL (repo secret SUPABASE_URL)", process.env.NEXT_PUBLIC_SUPABASE_URL],
+  ["SUPABASE_SERVICE_KEY", process.env.SUPABASE_SERVICE_KEY],
+].filter(([, v]) => !v).map(([n]) => n);
+if (missing.length) {
+  console.error("");
+  console.error("Missing GitHub repo secrets:");
+  for (const n of missing) console.error("  - " + n);
+  console.error("");
+  console.error("Add them at: Settings -> Secrets and variables -> Actions");
+  console.error("Names are case-sensitive.");
+  console.error("Vercel environment variables are a separate system and do not apply here.");
+  console.error("");
+  process.exit(1);
+}
 
 if (process.argv.includes("--monthly")) {
   const m = monthKey();
