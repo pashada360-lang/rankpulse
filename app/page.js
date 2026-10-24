@@ -1,206 +1,192 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { sb, configured } from "../lib/supabase";
-import { PLANS, inr } from "../lib/plans";
-
-/* the hero visual: a keyword climbing the page-one ladder, month by month */
-function Ladder() {
-  const rivals = ["travelopro.com", "trawex.com", "developers.booking.com", "technoheaven.com", "altexsoft.com", "phptravels.com", "bookingxml.com", "siteminder.com", "hoteltechreport.com"];
-  const [pos, setPos] = useState(7);
-  const [month, setMonth] = useState(0);
-  const months = ["Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  useEffect(() => {
-    const path = [7, 5, 4, 2, 1, 1];
-    let i = 0;
-    const t = setInterval(() => { i = (i + 1) % path.length; setPos(path[i]); setMonth(i); }, 1800);
-    return () => clearInterval(t);
-  }, []);
-  const rows = [];
-  let r = 0;
-  for (let p = 1; p <= 8; p++) {
-    if (p === pos) rows.push({ p, d: "yourbrand.com", you: true });
-    else rows.push({ p, d: rivals[r++], you: false });
-  }
-  return (
-    <div className="ladder" aria-hidden="true">
-      <div className="badge">{months[month]}-26 · India</div>
-      <div className="lt"><span>hotel booking software</span><span>Google · page 1</span></div>
-      {rows.map(x => (
-        <div key={x.p} className={"row" + (x.you ? " you" : "")} style={{ transition: "all .5s ease" }}>
-          <span className="n">#{x.p}</span>
-          <span className="d">{x.d}</span>
-          {x.you && <span className="chip ok" style={{ fontSize: 10 }}>you</span>}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function Counter({ to, suffix = "" }) {
-  const [v, setV] = useState(0);
-  const ref = useRef(null);
-  useEffect(() => {
-    const el = ref.current; if (!el) return;
-    const io = new IntersectionObserver(([e]) => {
-      if (!e.isIntersecting) return;
-      io.disconnect();
-      const start = performance.now(), dur = 1100;
-      const tick = t => { const k = Math.min(1, (t - start) / dur); setV(Math.round(to * (1 - Math.pow(1 - k, 3)))); if (k < 1) requestAnimationFrame(tick); };
-      requestAnimationFrame(tick);
-    }, { threshold: .4 });
-    io.observe(el);
-    return () => io.disconnect();
-  }, [to]);
-  return <span ref={ref} className="counter">{v.toLocaleString("en-IN")}{suffix}</span>;
-}
+import { PLANS, price, fmt, guessCurrency } from "../lib/plans";
+import { Nav, Footer, CTA, useReveal } from "../components/Site";
+import DashboardMock from "../components/DashboardMock";
 
 export default function Home() {
   const router = useRouter();
-  const [checking, setChecking] = useState(true);
-  const [cycle, setCycle] = useState("monthly");
-
+  const [ready, setReady] = useState(false);
+  const [cur, setCur] = useState("USD");
   useEffect(() => {
-    if (!configured) { setChecking(false); return; }
-    sb().auth.getSession().then(({ data }) => {
-      if (data.session) router.replace("/dashboard"); else setChecking(false);
-    });
+    setCur(guessCurrency());
+    if (!configured) return setReady(true);
+    sb().auth.getSession().then(({ data }) => data.session ? router.replace("/dashboard") : setReady(true));
   }, [router]);
-
-  /* scroll reveal + top progress bar */
-  useEffect(() => {
-    if (checking) return;
-    const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && e.target.classList.add("in")), { threshold: .12 });
-    document.querySelectorAll(".rev").forEach(el => io.observe(el));
-    const bar = document.getElementById("pbar");
-    const onScroll = () => { const h = document.documentElement; bar && (bar.style.width = (h.scrollTop / (h.scrollHeight - h.clientHeight) * 100) + "%"); };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => { io.disconnect(); window.removeEventListener("scroll", onScroll); };
-  }, [checking]);
-
-  if (checking) return null;
+  useReveal();
+  if (!ready) return null;
 
   return (
     <>
-      <div className="bar-fixed" id="pbar" />
-      <nav className="nav"><div className="nav-in">
-        <div className="brand"><div className="mark">R</div>RankPulse</div>
-        <div className="spacer" />
-        <a href="#how" style={{ color: "var(--ink-2)", fontSize: 14, fontWeight: 600 }}>How it works</a>
-        <a href="#pricing" style={{ color: "var(--ink-2)", fontSize: 14, fontWeight: 600, marginLeft: 16 }}>Pricing</a>
-        <a className="btn btn-ghost" href="/login" style={{ marginLeft: 16 }}>Sign in</a>
-        <a className="btn btn-primary" href="/signup">Start free</a>
-      </div></nav>
-
-      <div className="wrap">
-        {/* ───────── hero ───────── */}
-        <section className="hero">
+      <div className="band">
+        <div className="orb a" /><div className="orb b" />
+        <Nav dark />
+        <section className="hero2">
           <div>
-            <span className="eyebrow"><span className="dot" style={{ background: "var(--up)" }} />Live Google positions · every month</span>
-            <h1 style={{ marginTop: 18 }}>See exactly where you rank — in every country you sell to.</h1>
-            <p className="lead">
-              Add your keywords once. RankPulse checks your Google position from a real IP address in each
-              market, every month, and shows you what moved — by keyword, by region, over time.
-              No estimates. No guessing from your own personalised results.
-            </p>
-            <div style={{ display: "flex", gap: 11, marginTop: 26, flexWrap: "wrap" }}>
-              <a className="btn btn-primary" href="/signup" style={{ padding: "12px 22px", fontSize: 15 }}>Start free — 14 days</a>
-              <a className="btn btn-ghost" href="#how" style={{ padding: "12px 22px", fontSize: 15 }}>See how it works</a>
+            <span className="eyebrow2"><span className="dot" style={{ background: "#67E8F9" }} />Live positions · AI-search citations · every month</span>
+            <h1 style={{ marginTop: 22 }}>Know exactly where you rank in <span className="hl">every market you sell to.</span></h1>
+            <p className="lead">RankPulse checks your Google position from a real IP in each country, every month, and tells you whether ChatGPT, Perplexity and Gemini cite you when buyers ask. No estimates. No personalised results. Just what a stranger sees.</p>
+            <div style={{ display: "flex", gap: 12, marginTop: 30, flexWrap: "wrap" }}>
+              <a className="btn-glow" href="/signup">Start free — 14 days</a>
+              <a className="btn-dark-ghost" href="#how">See how it works</a>
             </div>
-            <p style={{ fontSize: 12.5, color: "var(--ink-3)", marginTop: 12 }}>No card needed · first scan runs within 30 minutes</p>
+            <div className="note-sm">No card · first results within the hour · cancel any time</div>
+            <div className="pillrow">
+              <span><b>4</b> markets from in-country IPs</span>
+              <span><b>4</b> AI engines tracked</span>
+              <span>Page one only — <b>no vanity data</b></span>
+            </div>
           </div>
-          <Ladder />
+          <DashboardMock />
         </section>
-
-        {/* ───────── proof strip ───────── */}
-        <div className="kpis rev">
-          <div className="kpi"><div className="l">Markets</div><div className="v"><Counter to={4} suffix="+" /></div><div className="s">India · US · Middle East · Europe, from in-country IPs</div></div>
-          <div className="kpi"><div className="l">Positions tracked</div><div className="v">1–10</div><div className="s">page one only — where the clicks are</div></div>
-          <div className="kpi"><div className="l">History kept</div><div className="v">∞</div><div className="s">every month saved, never overwritten</div></div>
-          <div className="kpi"><div className="l">Setup time</div><div className="v"><Counter to={3} suffix=" min" /></div><div className="s">domain, countries, keywords — done</div></div>
-        </div>
-
-        {/* ───────── why ───────── */}
-        <section className="section rev">
-          <h2>Your own Google results are lying to you.</h2>
-          <p className="sub">
-            Signed in, on a site you visit every day, Google quietly promotes your own pages. You see a #1
-            that your customers never get. RankPulse measures with no cookies, no history and no sign-in —
-            from the country your buyer is actually in. What a stranger sees, not what you see.
-          </p>
-          <div className="feat">
-            <div className="f"><h3>Real in-country positions</h3><p>A searcher in Dubai sees a different page one than one in Delhi. We check from both, so you know where you actually stand in each market.</p></div>
-            <div className="f"><h3>Month-on-month movement</h3><p>Every keyword, every region, every month in one grid. Click any keyword and see its full history and who ranks around it.</p></div>
-            <div className="f"><h3>Honest about gaps</h3><p>A failed check is marked unmeasured — never counted as “not ranking”. Your numbers never show a crisis that didn't happen.</p></div>
-            <div className="f"><h3>Who ranks instead of you</h3><p>For every keyword we store the full page one, so you can see exactly which competitor holds the spot you want.</p></div>
-            <div className="f"><h3>Runs itself</h3><p>Scans run on the 1st of every month automatically. Trigger one by hand whenever you ship a change.</p></div>
-            <div className="f"><h3>Built for small teams</h3><p>No per-seat pricing, no 40-tab dashboard. The one view that answers “did we move?” — and nothing you have to learn.</p></div>
-          </div>
-        </section>
-
-        {/* ───────── how ───────── */}
-        <section className="section rev" id="how">
-          <h2>How it works</h2>
-          <p className="sub">Three steps, about three minutes. Your first results land the same day.</p>
-          <div className="steps3">
-            <div className="step"><div className="num">1</div><h3>Add your site and keywords</h3><p>Your domain, the countries you sell to, and the phrases a buyer types when choosing you — one per line.</p></div>
-            <div className="step"><div className="num">2</div><h3>We measure from each market</h3><p>Every keyword is searched on Google through a real IP in each country, with no cookies or history. Page one only.</p></div>
-            <div className="step"><div className="num">3</div><h3>Watch what moves</h3><p>Positions land on your dashboard by region and month. Every month after, it repeats on its own.</p></div>
-          </div>
-        </section>
-
-        {/* ───────── pricing ───────── */}
-        <section className="section rev" id="pricing">
-          <h2>Simple pricing. Two months free on annual.</h2>
-          <p className="sub">Every plan includes all countries, full history, competitor page-one data and automatic monthly scans. 14-day free trial on all of them.</p>
-          <div className="seg" style={{ marginTop: 22 }}>
-            <button className={cycle === "monthly" ? "on" : ""} onClick={() => setCycle("monthly")}>Monthly</button>
-            <button className={cycle === "annual" ? "on" : ""} onClick={() => setCycle("annual")}>Annual <span style={{ color: "var(--up)", marginLeft: 4 }}>−2 months</span></button>
-          </div>
-          <div className="plans">
-            {Object.entries(PLANS).map(([k, p]) => (
-              <div key={k} className={"plan" + (p.hot ? " hot" : "")}>
-                <div className="pn">{p.name}{p.hot && <span className="chip ok" style={{ marginLeft: 8 }}>Most popular</span>}</div>
-                <div className="pp">{cycle === "monthly" ? inr(p.monthly) : inr(Math.round(p.annual / 12))}<small>/month</small></div>
-                {cycle === "annual" && <div style={{ fontSize: 12.5, color: "var(--ink-3)" }}>{inr(p.annual)} billed yearly · 12 months for the price of 10</div>}
-                <p style={{ color: "var(--ink-2)", fontSize: 14, margin: "10px 0 0" }}>{p.desc}</p>
-                <ul>
-                  <li>{p.keywords} keywords</li>
-                  <li>{p.regions} countries</li>
-                  <li>Monthly automatic scans</li>
-                  <li>Full history, never deleted</li>
-                  <li>Who ranks on page one, per keyword</li>
-                </ul>
-                <a className={"btn " + (p.hot ? "btn-primary" : "btn-ghost")} href={`/signup?plan=${k}&cycle=${cycle}`}>Start 14-day trial</a>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ───────── faq ───────── */}
-        <section className="section rev">
-          <h2>Questions</h2>
-          <div className="faq">
-            <div><h4>Why do I see a better position when I search myself?</h4><p>Google personalises results for signed-in users and boosts sites you visit often. Open an incognito window and you'll see what RankPulse sees.</p></div>
-            <div><h4>Why page one only?</h4><p>Position 11 and position 80 both mean nobody found you. Tracking beyond the top 10 adds noise and invites celebrating movement that changes nothing.</p></div>
-            <div><h4>How often does it scan?</h4><p>Automatically on the 1st of every month. You can also trigger a scan by hand any time — results land within about 30 minutes.</p></div>
-            <div><h4>What does “not measured” mean?</h4><p>A search that failed to return a readable page. We mark it rather than guess, and retry automatically. It is never counted as a loss.</p></div>
-            <div><h4>Can I change my keywords?</h4><p>Any time. Add, remove or regroup them from the dashboard. History for a removed keyword is kept.</p></div>
-            <div><h4>What happens after the trial?</h4><p>Your data stays. Scans pause until you pick a plan. Nothing is deleted.</p></div>
-          </div>
-        </section>
-
-        <div className="cta rev">
-          <h2>Know where you stand by this time tomorrow.</h2>
-          <p>Three minutes to set up. Your first real positions, from every market you sell to, within the hour.</p>
-          <a className="btn" href="/signup" style={{ padding: "12px 24px", fontSize: 15 }}>Start free — no card</a>
-        </div>
-
-        <footer style={{ borderTop: "1px solid var(--rule)", padding: "22px 0 40px", fontSize: 12.5, color: "var(--ink-3)", display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
-          <span>© {new Date().getFullYear()} RankPulse</span>
-          <span><a href="/login">Sign in</a> · <a href="#pricing">Pricing</a> · <a href="mailto:pasha@zentrumhub.com">Contact</a></span>
-        </footer>
       </div>
+
+      {/* ── the problem ── */}
+      <section className="sec">
+        <div className="split">
+          <div className="rv">
+            <span className="kick">The problem</span>
+            <h2>Your own Google results are lying to you.</h2>
+            <p className="sub">Signed in, on a site you visit every day, Google quietly promotes your own pages. Teams routinely “see” a #1 their customers never get. Then a month later they wonder why leads dropped.</p>
+            <p className="sub">RankPulse measures with no cookies, no history, no sign-in — from the country your buyer is actually in. We found an 8-place gap between a team's own view and reality on their most important keyword. That gap is the product.</p>
+          </div>
+          <div className="card2 rv d1" style={{ padding: 26 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--ink-3)" }}>Same keyword · same day · India</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginTop: 16 }}>
+              <div style={{ background: "var(--paper-2)", borderRadius: 12, padding: 18 }}>
+                <div style={{ fontSize: 12.5, color: "var(--ink-3)", fontWeight: 600 }}>What the founder saw</div>
+                <div className="mono" style={{ fontSize: 44, fontWeight: 700, color: "var(--up)" }}>#1</div>
+                <div style={{ fontSize: 12.5, color: "var(--ink-3)" }}>signed in · daily visitor</div>
+              </div>
+              <div style={{ background: "var(--down-bg)", borderRadius: 12, padding: 18 }}>
+                <div style={{ fontSize: 12.5, color: "var(--ink-3)", fontWeight: 600 }}>What a buyer saw</div>
+                <div className="mono" style={{ fontSize: 44, fontWeight: 700, color: "var(--down)" }}>—</div>
+                <div style={{ fontSize: 12.5, color: "var(--ink-3)" }}>not on page one</div>
+              </div>
+            </div>
+            <p style={{ fontSize: 13, color: "var(--ink-2)", marginTop: 16, marginBottom: 0 }}>Real case from our own tracking. The page existed, was indexed, and ranked for nobody but its owner.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── stats ── */}
+      <section className="sec tight" style={{ paddingTop: 0 }}>
+        <div className="statrow">
+          <div className="rv"><div className="stat">145</div><div className="l">keywords tracked across 4 markets for 3 months to build this</div></div>
+          <div className="rv d1"><div className="stat">8→23</div><div className="l">top-3 placements gained in one month by acting on the data</div></div>
+          <div className="rv d2"><div className="stat">61%</div><div className="l">of buyer questions where an AI assistant cited the source brand</div></div>
+          <div className="rv d3"><div className="stat">≈$1</div><div className="l">what a full 4-market monthly scan actually costs to run</div></div>
+        </div>
+      </section>
+
+      {/* ── features ── */}
+      <section className="sec" id="features">
+        <div className="rv"><span className="kick">What you get</span><h2>One grid that answers “did we move?”</h2>
+          <p className="sub">Not forty tabs. The view a marketing lead actually opens on the first of the month.</p></div>
+        <div className="grid3">
+          {[
+            ["🌍", "In-country positions", "A buyer in Dubai sees a different page one than one in Delhi. We measure from both — real IPs, not a proxy guess."],
+            ["📅", "Month-on-month history", "Every keyword, every region, every month. Nothing is ever overwritten, so a trend is a trend."],
+            ["🤖", "AI-search visibility", "Do ChatGPT, Perplexity, Gemini and Google AI cite you when buyers ask? Measured on real questions, by funnel stage."],
+            ["🧭", "Who holds the spot", "For every keyword we store the full page one. See exactly which competitor sits where you want to be."],
+            ["🩺", "Honest about gaps", "A failed check is marked unmeasured — never counted as a loss. Your numbers can't show a crisis that didn't happen."],
+            ["⚡", "Runs itself", "Scans run on the 1st of every month, automatically. Trigger one by hand the day you ship a change."],
+          ].map(([ic, t, d], i) => (
+            <div key={t} className={"fc rv d" + (i % 3)}><div className="ic">{ic}</div><h3>{t}</h3><p>{d}</p></div>
+          ))}
+        </div>
+        <div style={{ marginTop: 28 }}><a href="/features" style={{ fontWeight: 650 }}>All features →</a></div>
+      </section>
+
+      {/* ── AEO ── */}
+      <section className="band" style={{ padding: "0" }}>
+        <div className="orb b" style={{ top: "auto", bottom: -120, right: "30%" }} />
+        <div className="sec" style={{ color: "#fff" }}>
+          <div className="split">
+            <div className="rv">
+              <span className="kick" style={{ color: "#A5B4FC" }}>AI search · included on Growth and above</span>
+              <h2 style={{ color: "#fff" }}>Buyers are asking ChatGPT now. Are you the answer?</h2>
+              <p className="sub" style={{ color: "rgba(255,255,255,.72)" }}>We put real buyer questions — not keywords — to ChatGPT, Perplexity, Gemini and Google AI Overview, and measure whether your site is cited. Then we tell you what to fix, page by page: what to add, what to stop doing, and the one robots.txt line that silently blocks you.</p>
+              <ul className="check" style={{ color: "#fff" }}>
+                <li className="ok" style={{ color: "rgba(255,255,255,.8)" }}>Citation rate per engine and per funnel stage</li>
+                <li className="ok" style={{ color: "rgba(255,255,255,.8)" }}>Pages that rank on Google but never get cited — the cheapest fixes</li>
+                <li className="ok" style={{ color: "rgba(255,255,255,.8)" }}>Crawler-access audit: the GPTBot / Google-Extended blocks that make you invisible</li>
+              </ul>
+              <div style={{ marginTop: 24 }}><a className="btn-dark-ghost" href="/aeo" style={{ display: "inline-block" }}>How AI-search tracking works →</a></div>
+            </div>
+            <div className="rv d1">
+              <div className="aeo-cards">
+                {[["Perplexity", 65], ["ChatGPT", 61], ["Google AI", 31], ["Gemini", 4]].map(([e, p]) => (
+                  <div key={e} style={{ background: "rgba(255,255,255,.05)", borderColor: "rgba(255,255,255,.1)" }}>
+                    <div className="e" style={{ color: "rgba(255,255,255,.7)" }}>{e}</div>
+                    <div className="p" style={{ color: "#fff" }}>{p}%</div>
+                    <div className="bar3" style={{ background: "rgba(255,255,255,.08)" }}><i style={{ width: p + "%" }} /></div>
+                  </div>
+                ))}
+              </div>
+              <div className="card2" style={{ marginTop: 14, padding: 18, background: "rgba(255,255,255,.05)", borderColor: "rgba(255,255,255,.1)", color: "#fff" }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: "#FCA5A5" }}>🚫 Crawler blocked</div>
+                <div className="mono" style={{ fontSize: 12.5, marginTop: 8, color: "rgba(255,255,255,.8)", lineHeight: 1.7 }}>User-agent: Google-Extended<br />Disallow: /</div>
+                <p style={{ fontSize: 13, color: "rgba(255,255,255,.7)", margin: "10px 0 0" }}>Gemini named this brand in 9 answers and linked it in 1. It knew who they were — and wasn't allowed to say so. One line, ten minutes, fixed.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── how ── */}
+      <section className="sec" id="how">
+        <div className="rv"><span className="kick">How it works</span><h2>Three minutes to set up. Results the same hour.</h2></div>
+        <div className="grid3">
+          {[["1", "Add your site and keywords", "Your domain, the countries you sell to, and the phrases a buyer types when choosing you. Paste a list; we'll suggest more from your own sitemap."],
+            ["2", "We measure from each market", "Every keyword is searched on Google through a real IP in each country, with no cookies or history. Page one only."],
+            ["3", "Watch what moves", "Positions land on your dashboard by region and month. Click any keyword for its full history and who ranks around it. Every month after, it repeats on its own."]].map(([n, t, d], i) => (
+            <div key={n} className={"fc rv d" + i}><div className="ic" style={{ fontFamily: "var(--mono)", fontWeight: 700 }}>{n}</div><h3>{t}</h3><p>{d}</p></div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── pricing preview ── */}
+      <section className="sec" id="pricing" style={{ paddingTop: 20 }}>
+        <div className="rv"><span className="kick">Pricing</span><h2>Simple plans. Two months free on annual.</h2>
+          <p className="sub">Every plan includes all your countries, full history and automatic monthly scans. 14-day free trial, no card.</p></div>
+        <div className="plans2">
+          {Object.entries(PLANS).map(([k, p], i) => (
+            <div key={k} className={"plan2 rv d" + i + (p.hot ? " hot" : "")}>
+              {p.hot && <div className="tag">Most popular</div>}
+              <div className="pn">{p.name}</div>
+              <div className="pp2">{fmt(price(p, cur, "monthly"), cur)}<small>/mo</small></div>
+              <div className="desc">{p.desc}</div>
+              <ul>{p.perks.slice(0, 4).map(x => <li key={x}>{x}</li>)}</ul>
+              <a className={"btn " + (p.hot ? "" : "btn-ghost")} href={`/signup?plan=${k}`} style={p.hot ? {} : {}}>Start 14-day trial</a>
+            </div>
+          ))}
+        </div>
+        <div style={{ marginTop: 22, display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap" }}>
+          <a href="/pricing" style={{ fontWeight: 650 }}>Full pricing and plan comparison →</a>
+          <button className="btn btn-ghost" style={{ padding: "6px 12px", fontSize: 12.5 }} onClick={() => setCur(c => c === "USD" ? "INR" : "USD")}>Show in {cur === "USD" ? "INR" : "USD"}</button>
+        </div>
+      </section>
+
+      {/* ── FAQ ── */}
+      <section className="sec tight">
+        <div className="rv"><h2 style={{ fontSize: 30 }}>Questions people ask before they sign up</h2></div>
+        <div className="acc rv">
+          {[
+            ["Why do I see a better position when I search myself?", "Google personalises results for signed-in users and boosts sites you visit often. Open an incognito window and you'll see what RankPulse sees — and what your buyers see."],
+            ["Why page one only?", "Position 11 and position 80 both mean nobody found you. Tracking beyond the top 10 adds noise and invites celebrating movement that changes nothing."],
+            ["How is this different from Ahrefs or Semrush?", "They estimate from a crawl of the web and charge for a thousand things you won't open. We run the actual search, from the actual country, and keep one grid. We also measure AI-search citations, which they don't. See the comparison page."],
+            ["What does “not measured” mean?", "A search that failed to return a readable page. We mark it and retry automatically. It is never counted as a loss, so your trend line can't lie to you."],
+            ["Can I change my keywords?", "Any time. Add, remove or regroup them from the dashboard. History for a removed keyword is kept."],
+            ["What happens after the trial?", "Your data stays. Scans pause until you pick a plan. Nothing is deleted."],
+          ].map(([q, a]) => <details key={q}><summary>{q}</summary><p>{a}</p></details>)}
+        </div>
+      </section>
+
+      <CTA />
+      <Footer />
     </>
   );
 }

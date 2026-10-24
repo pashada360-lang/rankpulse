@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { sb, REGIONS, lastMonths, monthKey } from "../../lib/supabase";
+import AeoPanel from "../../components/AeoPanel";
 
 const TABS = [
   { k: "commercial", label: "Commercial", pill: "comm" },
@@ -107,7 +108,7 @@ export default function Dashboard() {
   return (
     <>
       <nav className="nav"><div className="nav-in">
-        <div className="brand"><div className="mark">R</div>RankPulse</div>
+        <a className="brand" href="/dashboard"><div className="mark">R</div>RankPulse</a>
         <span style={{ color: "var(--ink-3)", fontSize: 13.5 }}>{site.domain}</span>
         <div className="spacer" />
         {active
@@ -115,7 +116,7 @@ export default function Dashboard() {
           : latest && <span className="scanchip done"><span className="pulse" />Last scan {latest.month}</span>}
         <a className="btn btn-ghost" href="/keywords">Keywords</a>
         <button className="btn btn-ghost" onClick={queueScan} disabled={queuing || active}>{queuing ? "Queuing…" : "Run scan now"}</button>
-        <a className="btn btn-ghost" href="/pricing">{acc?.plan === "trial" ? "Choose plan" : "Plan"}</a>
+        <a className="btn btn-ghost" href="/billing">{acc?.plan === "trial" ? "Choose plan" : "Plan"}</a>
         <button className="btn btn-ghost" onClick={async () => { await sb().auth.signOut(); router.replace("/"); }}>Sign out</button>
       </div></nav>
 
@@ -124,7 +125,7 @@ export default function Dashboard() {
           <div className="notice-bar"><span>⏱</span><div>
             <b>{trialLeft > 0 ? `${trialLeft} days left on your free trial.` : "Your free trial has ended."}</b>{" "}
             {trialLeft > 0 ? "Scans keep running until it ends." : "Scans are paused until you choose a plan — your data is safe."}{" "}
-            <a href="/pricing">See plans →</a>
+            <a href="/billing">See plans →</a>
           </div></div>
         )}
         {msg && <div className="notice-bar"><span>ⓘ</span><div>{msg}</div></div>}
@@ -156,8 +157,12 @@ export default function Dashboard() {
 
         <div className="tabs">
           {TABS.map(t => <button key={t.k} className={"tab" + (t.k === tab ? " on" : "")} onClick={() => setTab(t.k)}>{t.label}<span className="cnt">{rows.filter(x => (x.tab || "commercial") === t.k).length}</span></button>)}
+          <button className={"tab" + (tab === "aeo" ? " on" : "")} onClick={() => setTab("aeo")}>AI search<span className="cnt">AEO</span></button>
         </div>
 
+        {tab === "aeo" ? (
+          <AeoPanel site={site} acc={acc} rankingCount={stats.ranking} top3Count={stats.top3} keywordCount={rows.length} />
+        ) : (<>
         <div className="toolbar">
           <div className="search">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
@@ -197,6 +202,7 @@ export default function Dashboard() {
           Measured from a real IP in {REGIONS[region]?.name} with no cookies or search history — what a stranger sees, not what you see signed in.
           Click a keyword for every region and month.
         </p>
+        </>)}
       </div>
 
       {/* ───── drawer ───── */}

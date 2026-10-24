@@ -1,96 +1,59 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { sb } from "../../lib/supabase";
-import { PLANS, inr } from "../../lib/plans";
+import { PLANS, price, fmt, guessCurrency, ANNUAL_MONTHS } from "../../lib/plans";
+import { Nav, Footer, CTA, useReveal } from "../../components/Site";
 
 export default function Pricing() {
-  const router = useRouter();
-  const [acc, setAcc] = useState(null);
-  const [cycle, setCycle] = useState("annual");
-  const [busy, setBusy] = useState("");
-  const [err, setErr] = useState("");
-
-  useEffect(() => {
-    sb().auth.getSession().then(async ({ data }) => {
-      if (!data.session) return router.replace("/login");
-      const { data: a } = await sb().from("accounts").select("*").single();
-      setAcc(a);
-    });
-  }, [router]);
-
-  async function choose(planKey) {
-    setErr(""); setBusy(planKey);
-    const { data: s } = await sb().auth.getSession();
-    const res = await fetch("/api/checkout", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: "Bearer " + s.session.access_token },
-      body: JSON.stringify({ plan: planKey, cycle }),
-    });
-    const j = await res.json();
-    setBusy("");
-    if (j.error) return setErr(j.error);
-
-    /* Razorpay Checkout — loaded on demand */
-    await new Promise(r => { if (window.Razorpay) return r(); const sc = document.createElement("script"); sc.src = "https://checkout.razorpay.com/v1/checkout.js"; sc.onload = r; document.body.appendChild(sc); });
-    const rz = new window.Razorpay({
-      key: j.key, order_id: j.orderId, amount: j.amount, currency: "INR",
-      name: "RankPulse", description: `${PLANS[planKey].name} · ${cycle}`,
-      prefill: { email: s.session.user.email },
-      theme: { color: "#4F46E5" },
-      handler: async resp => {
-        const v = await fetch("/api/checkout/verify", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + s.session.access_token }, body: JSON.stringify({ ...resp, plan: planKey, cycle }) });
-        const vj = await v.json();
-        if (vj.ok) router.replace("/dashboard?upgraded=1"); else setErr(vj.error || "Payment could not be verified.");
-      },
-    });
-    rz.open();
-  }
+  const [cur, setCur] = useState("USD");
+  const [annual, setAnnual] = useState(true);
+  useEffect(() => setCur(guessCurrency()), []);
+  useReveal();
+  const cycle = annual ? "annual" : "monthly";
 
   return (
     <>
-      <nav className="nav"><div className="nav-in">
-        <div className="brand"><div className="mark">R</div>RankPulse</div>
-        <div className="spacer" />
-        <a className="btn btn-ghost" href="/dashboard">← Dashboard</a>
-      </div></nav>
-
-      <div className="wrap" style={{ paddingTop: 40, paddingBottom: 80 }}>
-        <h1 style={{ fontSize: 30 }}>Choose a plan</h1>
-        <p style={{ color: "var(--ink-2)", marginTop: 8, maxWidth: "60ch" }}>
-          {acc?.plan === "trial" ? "Your trial keeps running until it ends — picking a plan just means scans never pause." : `You're on ${PLANS[acc?.plan]?.name || acc?.plan}.`} Annual billing gives you two months free.
-        </p>
-        <div className="seg" style={{ marginTop: 20 }}>
-          <button className={cycle === "monthly" ? "on" : ""} onClick={() => setCycle("monthly")}>Monthly</button>
-          <button className={cycle === "annual" ? "on" : ""} onClick={() => setCycle("annual")}>Annual <span style={{ color: "var(--up)", marginLeft: 4 }}>−2 months</span></button>
+      <div className="band"><div className="orb a" /><div className="orb b" /><Nav dark />
+        <div className="sec" style={{ color: "#fff", paddingTop: 60, paddingBottom: 40, textAlign: "center" }}>
+          <span className="eyebrow2">Pricing</span>
+          <h1 className="disp" style={{ fontSize: "clamp(34px,5vw,56px)", marginTop: 20, lineHeight: 1.05 }}>One price. Every market. Two months free on annual.</h1>
+          <p className="lead" style={{ color: "rgba(255,255,255,.72)", margin: "18px auto 0" }}>14-day free trial on every plan. No card to start. Cancel monthly plans any time.</p>
+          <div className="ptoggle" style={{ justifyContent: "center", display: "flex" }}>
+            <span style={{ fontWeight: 600, color: annual ? "rgba(255,255,255,.6)" : "#fff" }}>Monthly</span>
+            <button className={"sw" + (annual ? " on" : "")} onClick={() => setAnnual(a => !a)} aria-label="Toggle annual billing"><i /></button>
+            <span style={{ fontWeight: 600, color: annual ? "#fff" : "rgba(255,255,255,.6)" }}>Annual <span style={{ color: "#67E8F9", fontSize: 13 }}>· 12 months for the price of {ANNUAL_MONTHS}</span></span>
+            <button className="btn-dark-ghost" style={{ padding: "6px 12px", fontSize: 12.5, marginLeft: 10 }} onClick={() => setCur(c => c === "USD" ? "INR" : "USD")}>{cur === "USD" ? "₹ INR" : "$ USD"}</button>
+          </div>
         </div>
-        {err && <div className="note bad" style={{ marginTop: 16 }}>{err}</div>}
+      </div>
 
-        <div className="plans">
-          {Object.entries(PLANS).map(([k, p]) => {
-            const current = acc?.plan === k;
+      <section className="sec" style={{ paddingTop: 10 }}>
+        <div className="plans2" style={{ marginTop: -10 }}>
+          {Object.entries(PLANS).map(([k, p], i) => {
+            const perMonth = annual ? Math.round(price(p, cur, "annual") / 12) : price(p, cur, "monthly");
             return (
-              <div key={k} className={"plan" + (p.hot ? " hot" : "")}>
-                <div className="pn">{p.name}{current && <span className="chip ok" style={{ marginLeft: 8 }}>Current</span>}{!current && p.hot && <span className="chip ok" style={{ marginLeft: 8 }}>Most popular</span>}</div>
-                <div className="pp">{cycle === "monthly" ? inr(p.monthly) : inr(Math.round(p.annual / 12))}<small>/month</small></div>
-                <div style={{ fontSize: 12.5, color: "var(--ink-3)", minHeight: 18 }}>{cycle === "annual" ? `${inr(p.annual)} billed yearly` : "billed monthly, cancel any time"}</div>
-                <p style={{ color: "var(--ink-2)", fontSize: 14, margin: "10px 0 0" }}>{p.desc}</p>
-                <ul>
-                  <li>{p.keywords} keywords</li>
-                  <li>{p.regions} countries</li>
-                  <li>Automatic monthly scans</li>
-                  <li>Full history, never deleted</li>
-                  <li>Page-one competitors per keyword</li>
-                </ul>
-                <button className={"btn " + (p.hot ? "btn-primary" : "btn-ghost")} disabled={!!busy || current} onClick={() => choose(k)}>
-                  {current ? "Your plan" : busy === k ? "Opening checkout…" : `Choose ${p.name}`}
-                </button>
+              <div key={k} className={"plan2 rv d" + i + (p.hot ? " hot" : "")}>
+                {p.hot && <div className="tag">Most popular</div>}
+                <div className="pn">{p.name}</div>
+                <div className="pp2">{fmt(perMonth, cur)}<small>/mo</small></div>
+                <div style={{ fontSize: 12.5, color: p.hot ? "rgba(255,255,255,.6)" : "var(--ink-3)" }}>{annual ? `${fmt(price(p, cur, "annual"), cur)} billed yearly` : "billed monthly"}</div>
+                <div className="desc">{p.desc}</div>
+                <ul>{p.perks.map(x => <li key={x}>{x}</li>)}</ul>
+                <a className={"btn " + (p.hot ? "" : "btn-primary")} href={`/signup?plan=${k}&cycle=${cycle}`}>Start 14-day trial</a>
               </div>
             );
           })}
         </div>
-        <p style={{ color: "var(--ink-3)", fontSize: 12.5, marginTop: 20 }}>Payments by Razorpay — UPI, cards, net banking. Prices in INR, GST extra where applicable. Cancel monthly plans any time; annual plans run for 12 months.</p>
-      </div>
+        <div className="grid3" style={{ marginTop: 40 }}>
+          {[["What counts as a keyword?", "One phrase, tracked in every country on your plan. 50 keywords in 2 countries = 100 positions a month."],
+            ["Can I change plans?", "Any time. Upgrades apply immediately; downgrades at the next renewal. Keywords above the new limit are paused, not deleted."],
+            ["Do you charge per user?", "No. Invite your whole team. Scale includes up to 10 sites under one login."],
+            ["GST and invoices?", "Indian customers are billed in INR with GST invoices. Everyone else is billed in USD. Annual plans get a single invoice."],
+            ["Refunds?", "Monthly plans: cancel any time, no refund for the current month. Annual plans: full refund within 14 days of the first charge."],
+            ["Need more?", "More than 1,000 keywords, more than 10 sites, or an API? Email hello@rankpulse.app and we'll quote."]].map(([t, d], i) => <div key={t} className={"fc rv d" + (i % 3)}><h3 style={{ marginTop: 0, fontSize: 15.5 }}>{t}</h3><p>{d}</p></div>)}
+        </div>
+      </section>
+      <CTA title="Start free. Decide in 14 days." sub="Every plan starts with a full-featured trial. If it doesn't earn its place in your first-of-the-month routine, walk away." />
+      <Footer />
     </>
   );
 }
