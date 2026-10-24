@@ -1,0 +1,9 @@
+{
+  "name": "rankpulse-worker",
+  "private": true,
+  "type": "module",
+  "description": "Scan worker. Kept separate from the web app so the Actions runner installs one package, not the whole Next.js tree.",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0"
+  }
+}
