@@ -17,7 +17,7 @@ export default function Privacy() {
       <h2>Where it lives</h2>
       <p>Application data is hosted on Supabase (database and authentication) and Vercel (application), and scans run on GitHub Actions. Search measurements are obtained through Bright Data's SERP API. Payments are processed by Razorpay. Each of these providers processes data under their own privacy terms.</p>
       <h2>Your rights</h2>
-      <p>You can export your data from the dashboard at any time. You can ask us to correct or delete your account and data by emailing <a href="mailto:hello@rankpulse.app">hello@rankpulse.app</a>; we complete deletion within 30 days. Residents of jurisdictions with specific data-protection rights (including the EU, UK and India's DPDP Act) may exercise those rights through the same address.</p>
+      <p>You can export your data from the dashboard at any time. You can ask us to correct or delete your account and data by emailing <a href="mailto:pashada360@gmail.com">pashada360@gmail.com</a>; we complete deletion within 30 days. Residents of jurisdictions with specific data-protection rights (including the EU, UK and India's DPDP Act) may exercise those rights through the same address.</p>
       <h2>Cookies</h2>
       <p>We use only the cookies and local storage needed to keep you signed in and remember dashboard preferences. No third-party advertising cookies.</p>
       <h2>Children</h2>
@@ -25,7 +25,7 @@ export default function Privacy() {
       <h2>Changes</h2>
       <p>We will post updates here and, for material changes, email account holders.</p>
       <h2>Contact</h2>
-      <p>ZentrumHub Technologies · Pune, India · <a href="mailto:hello@rankpulse.app">hello@rankpulse.app</a></p>
+      <p>ZentrumHub Technologies · Pune, India · <a href="mailto:pashada360@gmail.com">pashada360@gmail.com</a></p>
     </Legal>
   );
 }

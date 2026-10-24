@@ -5,7 +5,7 @@ export default function Contact() {
     <Legal title="Contact us" updated="">
       <p>RankPulse is built and operated by <b>ZentrumHub Technologies</b>, a travel-technology company based in Pune, India.</p>
       <h2>Support and billing</h2>
-      <p>Email <a href="mailto:hello@rankpulse.app">hello@rankpulse.app</a>. We reply within one business day, usually faster.</p>
+      <p>Email <a href="mailto:pashada360@gmail.com">pashada360@gmail.com</a>. We reply within one business day, usually faster.</p>
       <h2>Sales</h2>
       <p>Need more than 1,000 keywords, more than 10 sites, or an API? Same address — tell us what you're tracking and we'll quote.</p>
       <h2>Registered business</h2>

@@ -6,7 +6,7 @@ export default function Refunds() {
       <h2>Free trial</h2>
       <p>Every plan starts with a 14-day free trial. No payment method is required and nothing is charged. If you do not choose a plan, scans pause when the trial ends and your data is kept.</p>
       <h2>Cancelling</h2>
-      <p>You can cancel a subscription at any time from your dashboard or by emailing <a href="mailto:hello@rankpulse.app">hello@rankpulse.app</a>. Cancellation stops future renewals. Your access and scans continue until the end of the period you have already paid for.</p>
+      <p>You can cancel a subscription at any time from your dashboard or by emailing <a href="mailto:pashada360@gmail.com">pashada360@gmail.com</a>. Cancellation stops future renewals. Your access and scans continue until the end of the period you have already paid for.</p>
       <h2>Monthly plans</h2>
       <p>Monthly plans are not refunded for the current month once charged. Cancel before your renewal date to avoid the next charge.</p>
       <h2>Annual plans</h2>
@@ -18,7 +18,7 @@ export default function Refunds() {
       <h2>How refunds are paid</h2>
       <p>Refunds are issued through Razorpay to the original payment method and typically appear within 5–7 business days, depending on your bank.</p>
       <h2>Contact</h2>
-      <p>ZentrumHub Technologies · <a href="mailto:hello@rankpulse.app">hello@rankpulse.app</a></p>
+      <p>ZentrumHub Technologies · <a href="mailto:pashada360@gmail.com">pashada360@gmail.com</a></p>
     </Legal>
   );
 }

@@ -15,7 +15,7 @@ export async function POST(req) {
     const p = PLANS[plan];
     const cur = currency === "INR" ? "INR" : "USD";
     if (!p || !["monthly", "annual"].includes(cycle)) return Response.json({ error: "Unknown plan." }, { status: 400 });
-    if (!configured()) return Response.json({ error: "Payments are being switched on — email hello@rankpulse.app and we'll activate your plan by hand today." }, { status: 503 });
+    if (!configured()) return Response.json({ error: "Payments are being switched on — email pashada360@gmail.com and we'll activate your plan by hand today." }, { status: 503 });
 
     const { data: acc } = await db.from("accounts").select("id, company").eq("owner_id", u.user.id).single();
     const planId = await ensurePlan(db, plan, cycle, cur);

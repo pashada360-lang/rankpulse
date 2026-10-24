@@ -23,7 +23,7 @@ export default function Terms() {
       <h2>9. Governing law</h2>
       <p>These terms are governed by the laws of India. Disputes are subject to the courts of Pune, Maharashtra.</p>
       <h2>10. Contact</h2>
-      <p>ZentrumHub Technologies · <a href="mailto:hello@rankpulse.app">hello@rankpulse.app</a></p>
+      <p>ZentrumHub Technologies · <a href="mailto:pashada360@gmail.com">pashada360@gmail.com</a></p>
     </Legal>
   );
 }

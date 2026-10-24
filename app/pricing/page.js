@@ -49,7 +49,7 @@ export default function Pricing() {
             ["Do you charge per user?", "No. Invite your whole team. Scale includes up to 10 sites under one login."],
             ["GST and invoices?", "Indian customers are billed in INR with GST invoices. Everyone else is billed in USD. Annual plans get a single invoice."],
             ["Refunds?", "Monthly plans: cancel any time, no refund for the current month. Annual plans: full refund within 14 days of the first charge."],
-            ["Need more?", "More than 1,000 keywords, more than 10 sites, or an API? Email hello@rankpulse.app and we'll quote."]].map(([t, d], i) => <div key={t} className={"fc rv d" + (i % 3)}><h3 style={{ marginTop: 0, fontSize: 15.5 }}>{t}</h3><p>{d}</p></div>)}
+            ["Need more?", "More than 1,000 keywords, more than 10 sites, or an API? Email pashada360@gmail.com and we'll quote."]].map(([t, d], i) => <div key={t} className={"fc rv d" + (i % 3)}><h3 style={{ marginTop: 0, fontSize: 15.5 }}>{t}</h3><p>{d}</p></div>)}
         </div>
       </section>
       <CTA title="Start free. Decide in 14 days." sub="Every plan starts with a full-featured trial. If it doesn't earn its place in your first-of-the-month routine, walk away." />
