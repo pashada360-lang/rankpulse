@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import EngineLogo from "./EngineLogo";
 
 /* Small, dark, animated product panels for the marketing site.
    Not replicas of the dashboard — each shows one idea, moving. */
@@ -24,11 +25,13 @@ const Frame = ({ url, chip, children, chipLive }) => (
 
 /* ─── 1. AI answers: engine bars grow, stage bars swap per engine ─── */
 const ENG = [
-  { n: "Perplexity", p: 65, stages: [["Vendor evaluation", 80], ["Comparison", 88], ["Category", 57], ["Problem-aware", 29]] },
-  { n: "ChatGPT",    p: 61, stages: [["Vendor evaluation", 100], ["Comparison", 75], ["Category", 43], ["Problem-aware", 14]] },
-  { n: "Gemini",     p: 4,  stages: [["Vendor evaluation", 10], ["Comparison", 0], ["Category", 0], ["Problem-aware", 0]] },
-  { n: "Claude",     p: 48, stages: [["Vendor evaluation", 70], ["Comparison", 63], ["Category", 29], ["Problem-aware", 14]] },
+  { e: "perplexity", n: "Perplexity", p: 65, stages: [["Vendor evaluation", 80], ["Comparison", 88], ["Category", 57], ["Problem-aware", 29]] },
+  { e: "chatgpt",    n: "ChatGPT",    p: 61, stages: [["Vendor evaluation", 100], ["Comparison", 75], ["Category", 43], ["Problem-aware", 14]] },
+  { e: "gemini",     n: "Gemini",     p: 4,  stages: [["Vendor evaluation", 10], ["Comparison", 0], ["Category", 0], ["Problem-aware", 0]] },
+  { e: "claude",     n: "Claude",     p: 48, stages: [["Vendor evaluation", 70], ["Comparison", 63], ["Category", 29], ["Problem-aware", 14]] },
 ];
+/* inline logo that sits in running text (mk-n keeps its ellipsis, labels stay one line) */
+const Logo = ({ e, size = 12 }) => <EngineLogo engine={e} size={size} dark style={{ verticalAlign: "-2px", marginRight: 6 }} />;
 export function MockAI() {
   const ref = useRef(null); const on = useInView(ref);
   const [e, setE] = useState(0);
@@ -36,16 +39,16 @@ export function MockAI() {
   const cur = ENG[e];
   const col = p => p >= 50 ? "#4ADE80" : p >= 25 ? "#FBBF24" : "#F87171";
   return (
-    <div ref={ref}><Frame url="dashboard · AI answers" chip={`${cur.n} · Oct-26`} chipLive>
-      <div className="seg2">{ENG.map((x, i) => <span key={x.n} className={i === e ? "on" : ""}>{x.n}</span>)}</div>
+    <div ref={ref}><Frame url="dashboard · AI answers" chip={<><EngineLogo engine={cur.e} size={12} dark />{cur.n} · Oct-26</>} chipLive>
+      <div className="seg2">{ENG.map((x, i) => <span key={x.n} className={i === e ? "on" : ""} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}><EngineLogo engine={x.e} size={14} dark />{x.n}</span>)}</div>
       <div className="kp" style={{ gridTemplateColumns: "repeat(3,1fr)" }}>
         <div><div className="l">Citation rate</div><div className="v" style={{ color: col(cur.p) }}>{cur.p}%</div></div>
         <div><div className="l">Cited first</div><div className="v">{Math.round(cur.p / 5)}</div></div>
         <div><div className="l">Named</div><div className="v">{Math.round(cur.p / 4) + 2}</div></div>
       </div>
       <div className="mk-lbl">Citation rate by engine · same 15 questions</div>
-      {ENG.map((x, i) => <div key={x.n} className="mk-row"><span className={"mk-n" + (i === e ? " on" : "")}>{x.n}</span><span className="mk-track"><i style={{ width: on ? x.p + "%" : 0, background: col(x.p), transitionDelay: i * 120 + "ms" }} /></span><span className="mk-v">{x.p}%</span></div>)}
-      <div className="mk-lbl" style={{ marginTop: 14 }}>Where you win — {cur.n}</div>
+      {ENG.map((x, i) => <div key={x.n} className="mk-row"><span className={"mk-n" + (i === e ? " on" : "")}><Logo e={x.e} />{x.n}</span><span className="mk-track"><i style={{ width: on ? x.p + "%" : 0, background: col(x.p), transitionDelay: i * 120 + "ms" }} /></span><span className="mk-v">{x.p}%</span></div>)}
+      <div className="mk-lbl" style={{ marginTop: 14, display: "flex", alignItems: "center", gap: 6 }}>Where you win — <EngineLogo engine={cur.e} size={11} dark />{cur.n}</div>
       {cur.stages.map(([s, p], i) => <div key={s} className="mk-row"><span className="mk-n">{s}</span><span className="mk-track"><i style={{ width: on ? p + "%" : 0, background: col(p), transitionDelay: i * 90 + "ms" }} /></span><span className="mk-v">{p}%</span></div>)}
     </Frame></div>
   );
@@ -79,7 +82,7 @@ export function MockOpps() {
             <td>{o.who.map(w => <span key={w} className="mk-chip">{w}</span>)}</td>
             <td className="n" style={{ textAlign: "right", color: o.s >= 85 ? "#4ADE80" : "#FBBF24" }}>{live ? o.s : ""}</td>
           </tr>); })}</tbody></table>
-      <div className="mk-foot">★ Ranking without a page — build it, take the top spot</div>
+      <div className="mk-foot"><svg width="11" height="11" viewBox="0 0 24 24" fill="#E2A75E" aria-hidden="true" style={{ verticalAlign: "-1px", marginRight: 6 }}><path d="M12 2.5l2.9 6.2 6.8.8-5 4.7 1.3 6.8L12 17.7 6 21l1.3-6.8-5-4.7 6.8-.8z" /></svg>Ranking without a page — build it, take the top spot</div>
     </Frame></div>
   );
 }

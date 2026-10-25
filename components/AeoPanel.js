@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { DO_DONT, recommend } from "../lib/aeo-rules";
 import { PLANS } from "../lib/plans";
+import EngineLogo, { EngineRow } from "./EngineLogo";
 
 export default function AeoPanel({ site, acc, rankingCount, top3Count, keywordCount }) {
   const [audit, setAudit] = useState(null);
@@ -47,7 +48,7 @@ export default function AeoPanel({ site, acc, rankingCount, top3Count, keywordCo
             <table>
               <thead><tr><th>Crawler</th><th>Owner</th><th>What it controls</th><th className="n">Status</th></tr></thead>
               <tbody>{audit.results.map(b => (
-                <tr key={b.ua}><td className="mono" style={{ fontSize: 13 }}>{b.ua}</td><td>{b.who}</td><td style={{ color: "var(--ink-2)", fontSize: 13.5 }}>{b.controls}</td>
+                <tr key={b.ua}><td className="mono" style={{ fontSize: 13 }}>{b.ua}</td><td><span style={{ display: "inline-flex", alignItems: "center", gap: 7 }}>{b.engine && <EngineLogo engine={b.engine} size={16} dark />}<span>{b.who}</span></span></td><td style={{ color: "var(--ink-2)", fontSize: 13.5 }}>{b.controls}</td>
                   <td className="n">{b.blocked ? <span className="chip err">Blocked</span> : <span className="chip ok">Allowed</span>}</td></tr>
               ))}</tbody>
             </table>
@@ -58,11 +59,13 @@ export default function AeoPanel({ site, acc, rankingCount, top3Count, keywordCo
       {/* citation tracking */}
       <h2 style={{ fontSize: 18, marginTop: 30 }}>AI citation tracking</h2>
       {hasAeo ? (
-        <div className="notice-bar" style={{ marginTop: 10 }}><span>🤖</span><div><b>Included on your plan.</b> Add buyer questions under <a href="/keywords">Keywords → AI questions</a> and they'll be put to ChatGPT, Perplexity, Gemini and Google AI on your next scan. Results and the fix list appear here.</div></div>
+        <div className="notice-bar" style={{ marginTop: 10 }}><div><b>Included on your plan.</b> Add buyer questions under <a href="/keywords">Keywords → AI questions</a> and they'll be put to every engine below on your next scan. Results and the fix list appear here.
+          <div style={{ marginTop: 10 }}><EngineRow size={18} dark names /></div></div></div>
       ) : (
         <div className="card pad" style={{ marginTop: 10, display: "grid", gridTemplateColumns: "1fr auto", gap: 18, alignItems: "center" }}>
-          <div><div style={{ fontWeight: 700 }}>See whether ChatGPT, Perplexity and Gemini cite you.</div>
-            <div style={{ color: "var(--ink-2)", fontSize: 14, marginTop: 4 }}>Real buyer questions by funnel stage, four engines, a fix list ranked by payoff. On Growth and above.</div></div>
+          <div><div style={{ fontWeight: 700 }}>See which AI engines cite you.</div>
+            <div style={{ color: "var(--ink-2)", fontSize: 14, marginTop: 4 }}>Real buyer questions by funnel stage, a fix list ranked by payoff. On Growth and above.</div>
+            <div style={{ marginTop: 10 }}><EngineRow size={18} dark names /></div></div>
           <a className="btn btn-primary" href="/billing">Upgrade</a>
         </div>
       )}

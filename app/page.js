@@ -8,8 +8,13 @@ import DashboardMock from "../components/DashboardMock";
 import { MockAI, MockOpps, MockFix } from "../components/Mocks";
 
 import Flag from "../components/Flag";
+import EngineLogo, { EngineRow } from "../components/EngineLogo";
 /* each word animates in; the gradient is applied per word so background-clip survives the inline-block */
 const Words = ({ text, from = 0, hl = false }) => text.split(" ").map((w, i) => <span key={i} className={"hw" + (hl ? " hl" : "")} style={{ animationDelay: (from + i) * 70 + "ms" }}>{w}&nbsp;</span>);
+/* tiny stroke glyphs for feature cards — drawn, never emoji */
+const Glyph = ({ children }) => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>;
+/* one engine chip in the hero: real mark + name. Rendered flat (img + text) because .engines styles every nested span as a chip. */
+const EngineChip = ({ engine, name }) => <span className="e" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}><EngineLogo engine={engine} size={16} dark />{name}</span>;
 
 export default function Home() {
   const router = useRouter();
@@ -38,13 +43,13 @@ export default function Home() {
               <a className="btn-glow" href="/signup">Start free — 14 days</a>
               <a className="btn-dark-ghost" href="#tour">See the product</a>
             </div>
-            <div className="engines"><span className="lab">Measured on</span><span className="e"><b>G</b>Google</span><span className="e"><b>◎</b>ChatGPT</span><span className="e"><b>✦</b>Perplexity</span><span className="e"><b>✧</b>Gemini</span><span className="e"><b>❋</b>Claude</span></div>
+            <div className="engines"><span className="lab">Measured on</span><EngineChip engine="google" name="Google" /><EngineChip engine="chatgpt" name="ChatGPT" /><EngineChip engine="perplexity" name="Perplexity" /><EngineChip engine="gemini" name="Gemini" /><EngineChip engine="claude" name="Claude" /></div>
           </div>
           <div className="hero-wrap">
             <DashboardMock size="lg" />
             <div className="callout c1"><span className="big">#1</span>in 4 markets</div>
             <div className="callout c2"><span className="big">8→23</span>top-3 placements, one month</div>
-            <div className="callout c3"><span className="big">65%</span>cited by Perplexity</div>
+            <div className="callout c3"><span className="big">65%</span><span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>cited by <EngineLogo engine="perplexity" size={14} />Perplexity</span></div>
           </div>
         </section>
       </div>
@@ -91,6 +96,7 @@ export default function Home() {
           <div className="tour flip">
             <div className="rv"><h3>Is AI recommending you, or a competitor?</h3>
               <p>Real buyer questions put to ChatGPT, Perplexity, Gemini and Claude. We record who gets cited — by engine and by stage of the buying journey.</p>
+              <div style={{ marginTop: 14, fontSize: 13, fontWeight: 600, color: "var(--ink-2)" }}><EngineRow size={16} dark={false} names gap={14} /></div>
               <ul className="pts"><li>Citation rate per engine on identical questions</li><li>Strength by funnel stage — see exactly where you're invisible</li><li>Share of voice: the domains each engine trusts</li></ul></div>
             <div className="rv d1"><MockAI /></div>
           </div>
@@ -116,11 +122,11 @@ export default function Home() {
         <div className="rv"><span className="kick">Built from scars</span><h2>Every false signal a rank tracker can give — fixed before you see it.</h2></div>
         <div className="grid3">
           {[[<span key="f" style={{ display: "inline-flex", gap: 3 }}><Flag code="IN" size={14} /><Flag code="AE" size={14} /></span>, "In-country positions", "Dubai and Delhi get different page ones. We measure from both — real IPs, not a proxy guess."],
-            ["🧮", "Blocks, not links", "Sitelinks inflate naive counts: a real #2 logs as #6. We count results the way a person reads them."],
-            ["🩺", "Unmeasured ≠ not ranking", "A failed search is marked and retried, never recorded as zero. Your trend can't fake a crisis."],
-            ["🧭", "Who holds the spot", "Every keyword, every month, the ten domains on page one. Who took your position is one click away."],
-            ["🚫", "Crawler audit", "One robots.txt line can block Gemini and ChatGPT entirely. Checked at signup and every month after."],
-            ["📋", "Fix list by payoff", "Rank-but-not-cited pages first. Then create, reclaim, defend — with do / don't rules per page."]].map(([ic, t, d], i) => <div key={t} className={"fc rv d" + (i % 3)}><div className="ic">{ic}</div><h3>{t}</h3><p>{d}</p></div>)}
+            [<Glyph key="g"><rect x="3" y="3" width="18" height="18" rx="2.5" /><path d="M3 9h18M3 15h18M9 3v18M15 3v18" /></Glyph>, "Blocks, not links", "Sitelinks inflate naive counts: a real #2 logs as #6. We count results the way a person reads them."],
+            [<Glyph key="p"><path d="M2.5 12h4l3-7 4.5 14 3-7h4.5" /></Glyph>, "Unmeasured ≠ not ranking", "A failed search is marked and retried, never recorded as zero. Your trend can't fake a crisis."],
+            [<Glyph key="c"><circle cx="12" cy="12" r="9" /><path d="M15.5 8.5l-2.2 5.3-5.3 2.2 2.2-5.3z" /></Glyph>, "Who holds the spot", "Every keyword, every month, the ten domains on page one. Who took your position is one click away."],
+            [<span key="a" style={{ display: "inline-flex", gap: 3 }}><EngineLogo engine="gemini" size={16} /><EngineLogo engine="chatgpt" size={16} /></span>, "Crawler audit", "One robots.txt line can block Gemini and ChatGPT entirely. Checked at signup and every month after."],
+            [<Glyph key="l"><rect x="5" y="4" width="14" height="17" rx="2" /><path d="M9 4V2.5h6V4M9 11h6M9 15h4" /></Glyph>, "Fix list by payoff", "Rank-but-not-cited pages first. Then create, reclaim, defend — with do / don't rules per page."]].map(([ic, t, d], i) => <div key={t} className={"fc rv d" + (i % 3)}><div className="ic">{ic}</div><h3>{t}</h3><p>{d}</p></div>)}
         </div>
         <div style={{ marginTop: 22 }}><a href="/features" style={{ fontWeight: 650 }}>All features →</a><span style={{ color: "var(--ink-3)", margin: "0 10px" }}>·</span><a href="/compare" style={{ fontWeight: 650 }}>vs Ahrefs and Semrush →</a></div>
       </section>

@@ -42,7 +42,7 @@ export default function DashboardMock({ size = "md" }) {
       <div className="bar">
         <i /><i /><i />
         <span className="url">rankpulse.app/dashboard · yourbrand.com</span>
-        <span className="chip2"><i />{scan ? `Scanning ${REG[reg]} · ~4 min` : `Last scan Oct-26`}</span>
+        <span className="chip2"><i />{scan && <Flag code={CODE[reg]} size={13} />}{scan ? `Scanning ${REG[reg]} · ~4 min` : `Last scan Oct-26`}</span>
       </div>
       <div className="body">
         <div className="seg2">{REG.map((r, i) => <span key={r} className={i === reg ? "on" : ""} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}><Flag code={CODE[i]} size={14} />{r}</span>)}</div>

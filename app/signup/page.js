@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { sb } from "../../lib/supabase";
 import { PLANS } from "../../lib/plans";
+import EngineLogo, { EngineRow } from "../../components/EngineLogo";
 
 function SignUpInner() {
   const router = useRouter();
@@ -37,9 +38,13 @@ function SignUpInner() {
           <div className="card2" style={{ marginTop: 30, padding: 18, background: "rgba(255,255,255,.05)", borderColor: "rgba(255,255,255,.1)" }}>
             <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", color: "#A5B4FC" }}>Starting on {plan.name}</div>
             <div style={{ marginTop: 6, fontSize: 14, color: "rgba(255,255,255,.75)" }}>{plan.keywords} keywords · {plan.regions} countries{plan.aeo ? " · AI-search tracking" : ""}. Change plans any time. <a href="/pricing" style={{ color: "#C7D2FE" }}>Compare plans</a></div>
+            <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px solid rgba(255,255,255,.1)", display: "flex", alignItems: "center", gap: "8px 14px", flexWrap: "wrap", fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,.85)" }}>
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", color: "rgba(255,255,255,.45)" }}>Measured on</span>
+              {plan.aeo ? <EngineRow dark names size={16} gap={14} /> : <EngineLogo engine="google" size={16} dark withName />}
+            </div>
           </div>
         </div>
-        <div className="card pad" style={{ background: "var(--paper)" }}>
+        <div className="card pad" style={{ background: "#fff", color: "#15172B" }}>
           {sent ? (<>
             <h2 style={{ fontSize: 20 }}>Check your email</h2>
             <p style={{ color: "var(--ink-2)", marginTop: 10 }}>We sent a confirmation link to <b>{f.email}</b>. Click it, then sign in.</p>

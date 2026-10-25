@@ -3,6 +3,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { sb, REGIONS } from "../../lib/supabase";
 import { defaultPrompts } from "../../lib/ai-prompts";
+import AppShell from "../../components/AppShell";
+import Flag from "../../components/Flag";
+import { EngineRow } from "../../components/EngineLogo";
 
 export default function Onboarding() {
   const router = useRouter();
@@ -62,7 +65,7 @@ export default function Onboarding() {
         body: JSON.stringify({ siteId: site.id }),
       });
 
-      router.replace("/dashboard");
+      router.replace("/dashboard?welcome=1");
     } catch (e) {
       setErr(e.message || String(e));
       setBusy(false);
@@ -70,7 +73,7 @@ export default function Onboarding() {
   }
 
   return (
-    <>
+    <AppShell>
       <nav className="nav"><div className="nav-in">
         <div className="brand"><div className="mark">R</div>RankPulse</div>
         <div className="spacer" />
@@ -115,7 +118,7 @@ export default function Onboarding() {
               {Object.entries(REGIONS).map(([k, v]) => (
                 <label key={k} className={regions.includes(k) ? "on" : ""}>
                   <input type="checkbox" checked={regions.includes(k)} onChange={() => toggle(k)} />
-                  {v.name}
+                  <Flag code={k} size={18} />{v.name}
                 </label>
               ))}
             </div>
@@ -152,6 +155,6 @@ export default function Onboarding() {
           </div>
         )}
       </div>
-    </>
+    </AppShell>
   );
 }

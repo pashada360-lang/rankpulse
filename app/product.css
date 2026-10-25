@@ -1,0 +1,76 @@
+/* ═══ Product theme — the signed-in app wears the same skin as the landing page ═══
+   Applied by AppShell via html[data-theme="app"]. Dark ink ground, mesh glow, Outfit/DM Sans,
+   JetBrains Mono for every number, copper for the product's own figures. */
+:root[data-theme="app"]{
+  --accent:#8B86FF; --accent-weak:rgba(139,134,255,.16); --accent-ink:#C7D2FE;
+  --ink:#ECEEF8; --ink-2:#AEB3CC; --ink-3:#7C8199;
+  --paper:#0F1424; --paper-2:#131A2E; --paper-3:#1B2238;
+  --rule:rgba(255,255,255,.08); --rule-2:rgba(255,255,255,.16);
+  --up:#5EEAA0; --up-bg:rgba(94,234,160,.12); --down:#FF7A6B; --down-bg:rgba(255,122,107,.12);
+  --warn:#E2A75E; --warn-bg:rgba(226,167,94,.14);
+  --copper:#E2A75E;
+  --shadow:0 1px 2px rgba(0,0,0,.5),0 16px 40px -20px rgba(0,0,0,.8);
+  color-scheme:dark;
+}
+:root[data-theme="app"] body{
+  background:
+    radial-gradient(900px 480px at 10% -10%,rgba(91,91,214,.28),transparent 60%),
+    radial-gradient(700px 420px at 95% 0%,rgba(34,211,238,.12),transparent 60%),
+    #07090F;
+  color:var(--ink);
+}
+:root[data-theme="app"] .nav{background:rgba(7,9,15,.72);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08)}
+:root[data-theme="app"] .nav-in{padding:15px 22px}
+:root[data-theme="app"] .brand{color:#fff;font-size:17px}
+:root[data-theme="app"] .brand .mark{background:linear-gradient(135deg,#5B5BD6,#7C6CFF);box-shadow:0 4px 14px -4px rgba(91,91,214,.6)}
+:root[data-theme="app"] .btn-ghost{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.12);color:#fff}
+:root[data-theme="app"] .btn-ghost:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.2)}
+:root[data-theme="app"] .btn-primary{background:#fff;color:#0B0E1A}
+:root[data-theme="app"] .card,:root[data-theme="app"] .kpi,:root[data-theme="app"] .tablewrap{background:rgba(255,255,255,.035);border-color:rgba(255,255,255,.08);box-shadow:none}
+:root[data-theme="app"] th{background:rgba(255,255,255,.03);color:var(--ink-3)}
+:root[data-theme="app"] tbody tr.kw:hover td{background:rgba(255,255,255,.035)}
+:root[data-theme="app"] .kpi .v{font-family:var(--mono)}
+:root[data-theme="app"] .kpi .l{color:var(--ink-3)}
+:root[data-theme="app"] .pos{font-family:var(--mono)}
+:root[data-theme="app"] .pos.top{color:var(--up)} :root[data-theme="app"] .pos.mid{color:var(--copper)} :root[data-theme="app"] .pos.low{color:var(--ink-2)}
+:root[data-theme="app"] .delta.up{color:var(--up)} :root[data-theme="app"] .delta.down{color:var(--down)}
+:root[data-theme="app"] .seg{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.08)}
+:root[data-theme="app"] .seg button{color:var(--ink-3)}
+:root[data-theme="app"] .seg button.on{background:rgba(226,167,94,.16);color:#fff;box-shadow:inset 0 0 0 1px rgba(226,167,94,.4)}
+:root[data-theme="app"] .tabs{border-bottom-color:rgba(255,255,255,.08)}
+:root[data-theme="app"] .tab{color:var(--ink-3)} :root[data-theme="app"] .tab.on{color:#fff;border-bottom-color:var(--copper)}
+:root[data-theme="app"] .notice-bar{background:rgba(139,134,255,.08);border-color:rgba(139,134,255,.25)}
+:root[data-theme="app"] .notice-bar b{color:#fff}
+:root[data-theme="app"] .chip.ok{background:var(--up-bg);color:var(--up)} :root[data-theme="app"] .chip.err{background:var(--down-bg);color:var(--down)} :root[data-theme="app"] .chip.warn{background:var(--warn-bg);color:var(--warn)}
+:root[data-theme="app"] .pill.comm{background:rgba(139,134,255,.16);color:#C7D2FE} :root[data-theme="app"] .pill.prio{background:var(--up-bg);color:var(--up)} :root[data-theme="app"] .pill.long{background:rgba(255,255,255,.07);color:var(--ink-2)}
+:root[data-theme="app"] input,:root[data-theme="app"] textarea,:root[data-theme="app"] select{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1);color:#fff}
+:root[data-theme="app"] .drawer{background:#0F1424;border-left-color:rgba(255,255,255,.1)}
+:root[data-theme="app"] .rcell{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.08)}
+:root[data-theme="app"] .scanchip{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.12);color:#fff}
+:root[data-theme="app"] .scanchip .pulse{background:#67E8F9} :root[data-theme="app"] .scanchip .pulse::after{border-color:#67E8F9}
+:root[data-theme="app"] .scanchip.done .pulse{background:var(--up)}
+:root[data-theme="app"] .sovbar{background:rgba(255,255,255,.06)}
+:root[data-theme="app"] .sovname{color:var(--ink-2)} :root[data-theme="app"] .sovname.me{color:var(--copper)}
+:root[data-theme="app"] .spark span{background:var(--copper)} :root[data-theme="app"] .spark span.none{background:rgba(255,255,255,.12)}
+:root[data-theme="app"] .note.info{background:rgba(139,134,255,.08);border-color:rgba(139,134,255,.25);color:var(--ink)}
+:root[data-theme="app"] .note.bad{background:var(--down-bg);border-color:rgba(255,122,107,.35);color:var(--ink)}
+:root[data-theme="app"] .center .card{background:rgba(255,255,255,.04)}
+:root[data-theme="app"] .mtable td{font-family:var(--mono)}
+
+/* first-run: rows waiting for their first measurement shimmer instead of sitting blank */
+.skel{display:inline-block;height:12px;width:28px;border-radius:6px;background:linear-gradient(90deg,rgba(255,255,255,.06),rgba(255,255,255,.16),rgba(255,255,255,.06));background-size:200% 100%;animation:shim 1.6s linear infinite;vertical-align:middle}
+@keyframes shim{to{background-position:-200% 0}}
+.landed{animation:land .5s cubic-bezier(.2,.7,.2,1) both}
+@keyframes land{from{opacity:0;transform:translateY(-4px) scale(.96)}}
+.engine-seg button{display:inline-flex;align-items:center;gap:7px}
+.region-seg button{display:inline-flex;align-items:center;gap:7px}
+.pulse-row td{background:rgba(103,232,249,.05)!important}
+.welcome{background:linear-gradient(135deg,rgba(91,91,214,.22),rgba(34,211,238,.10));border:1px solid rgba(139,134,255,.3);border-radius:16px;padding:22px 24px;display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;margin-top:18px}
+.welcome h2{font-size:19px;color:#fff}
+.welcome p{color:var(--ink-2);margin:6px 0 0;font-size:14px;max-width:70ch}
+.steps-inline{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.steps-inline span{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink-2);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:5px 11px}
+.steps-inline span.done{color:var(--up);border-color:rgba(94,234,160,.3)}
+.steps-inline span.now{color:#fff;border-color:rgba(103,232,249,.4)}
+@media(max-width:800px){.welcome{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.skel,.landed{animation:none}}

@@ -5,11 +5,21 @@ import { sb, REGIONS, monthKey } from "../../lib/supabase";
 import { PLANS } from "../../lib/plans";
 import { ENGINE_LABELS, ENGINE_ORDER, STAGES } from "../../lib/ai-prompts";
 import AeoPanel from "../../components/AeoPanel";
+import AppShell from "../../components/AppShell";
+import EngineLogo, { EngineRow } from "../../components/EngineLogo";
+import Flag from "../../components/Flag";
 
 const TABS = [{ k: "commercial", label: "Commercial", pill: "comm" }, { k: "priority", label: "Priority", pill: "prio" }, { k: "longtail", label: "Long tail", pill: "long" }];
-const RCOL = { IN: "#E8890C", US: "#4F46E5", ME: "#17935D", EU: "#8B5CF6" };
 const lbl = k => { const [y, m] = k.split("-"); return new Date(+y, +m - 1, 1).toLocaleString("en", { month: "short" }) + "-" + y.slice(2); };
 const monthsBetween = (a, b) => { const out = []; let [y, m] = a.split("-").map(Number); const [by, bm] = b.split("-").map(Number); while (y < by || (y === by && m <= bm)) { out.push(`${y}-${String(m).padStart(2, "0")}`); m++; if (m > 12) { m = 1; y++; } } return out; };
+
+/* region name with its flag — used wherever a region is named */
+const Reg = ({ r, size = 13 }) => <span style={{ display: "inline-flex", alignItems: "center", gap: 5, whiteSpace: "nowrap" }}><Flag code={r} size={size} />{REGIONS[r]?.name || r}</span>;
+/* tiny inline glyphs (no emoji — they render as tofu on Windows) */
+const InfoGlyph = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ flex: "none", marginTop: 2 }}><circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 8h.01" /></svg>;
+const ClockGlyph = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ flex: "none", marginTop: 2 }}><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>;
+const SearchGlyph = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ flex: "none", marginTop: 2 }}><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>;
+const CheckGlyph = () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" style={{ flex: "none" }}><path d="m5 12 5 5L20 7" /></svg>;
 
 export default function Dashboard() {
   const router = useRouter();
@@ -58,6 +68,7 @@ export default function Dashboard() {
 
   const latest = runs[0];
   const active = latest && ["queued", "running"].includes(latest.status);
+  const hasDone = runs.some(r => r.status === "done");
   useEffect(() => { if (!active) return; const t = setInterval(load, 20000); return () => clearInterval(t); }, [active, load]);
 
   /* months: from the first month this site has data (signup month) through today, one column each */
@@ -78,6 +89,12 @@ export default function Dashboard() {
   const val = (row, m, r) => { const v = row.cells?.[`${m}|${r}`]; return v === undefined ? null : v; };
   const latestVal = (row, r) => { for (let i = months.length - 1; i >= 0; i--) { const v = val(row, months[i], r); if (v !== null) return v; } return null; };
   const cell = v => v === null ? <span className="pos na">·</span> : v === 0 ? <span className="pos none">—</span> : <span className={"pos " + (v <= 3 ? "top" : v <= 7 ? "mid" : "low")}>{v}</span>;
+  /* current-month cell while a scan is active: shimmer until the value lands, then animate it in */
+  const liveCell = (v, isCur) => {
+    if (!active || !isCur) return cell(v);
+    if (v === null) return <span className="skel" />;
+    return <span className="landed" style={{ display: "inline-block" }}>{cell(v)}</span>;
+  };
   const Delta = ({ d }) => d === null || d === undefined || d === 0 ? null : <span className={"delta " + (d > 0 ? "up" : "down")}>{d > 0 ? "▲" : "▼"} {Math.abs(d)}</span>;
 
   const stats = useMemo(() => {
@@ -121,23 +138,45 @@ export default function Dashboard() {
   const oppList = opps.filter(o => oppCls === "All" || o.cls === oppCls);
   const oppTally = (() => { const t = {}; opps.forEach(o => (o.top_domains || []).forEach(d => { if (!d.includes(site?.domain)) t[d] = (t[d] || 0) + 1; })); return Object.entries(t).sort((a, b) => b[1] - a[1]).slice(0, 10); })();
 
-  if (loading) return <div className="center"><p style={{ color: "var(--ink-3)" }}>Loading…</p></div>;
+  /* ───── initial load: the real layout, shimmering, never a bare "Loading…" ───── */
+  if (loading) return (
+    <AppShell>
+      <nav className="nav"><div className="nav-in">
+        <a className="brand" href="/dashboard"><div className="mark">R</div>RankPulse</a>
+        <span className="skel" style={{ width: 120 }} />
+        <div className="spacer" />
+        <span className="skel" style={{ width: 90, height: 28, borderRadius: 14 }} />
+      </div></nav>
+      <div className="wrap" style={{ paddingBottom: 72 }}>
+        <div className="kpis" style={{ marginTop: 18 }}>
+          {[0, 1, 2, 3].map(i => <div key={i} className="kpi"><div className="l"><span className="skel" style={{ width: 90 }} /></div><div className="v"><span className="skel" style={{ width: 56, height: 26 }} /></div><div className="s"><span className="skel" style={{ width: 120 }} /></div></div>)}
+        </div>
+        <div className="tablewrap"><table>
+          <thead><tr><th>Keyword</th><th className="n">{lbl(now)}</th><th className="n">Change</th><th>Status</th><th>Intent</th></tr></thead>
+          <tbody>{[0, 1, 2, 3, 4, 5].map(i => <tr key={i}><td><span className="skel" style={{ width: 120 + (i % 3) * 40 }} /></td><td className="n"><span className="skel" /></td><td className="n"><span className="skel" /></td><td><span className="skel" style={{ width: 64, height: 18, borderRadius: 9 }} /></td><td><span className="skel" style={{ width: 70, height: 18, borderRadius: 9 }} /></td></tr>)}</tbody>
+        </table></div>
+      </div>
+    </AppShell>
+  );
 
   const eta = Math.max(5, Math.round(rows.length * site.regions.length * 12 / 60));
   const trialLeft = acc?.plan === "trial" && acc.trial_ends_at ? Math.ceil((new Date(acc.trial_ends_at) - Date.now()) / 86400000) : null;
   const openRow = open ? rows.find(x => x.id === open) : null;
-  const bars = (items, total, hi) => items.map(([d, n]) => { const max = items[0]?.[1] || 1; const me = hi(d); return <div key={d} className="sovrow"><div className={"sovname" + (me ? " me" : "")}>{me ? "★ " : ""}{d}</div><div className="sovbar"><span style={{ width: (n / max * 100).toFixed(1) + "%", background: me ? "var(--accent)" : "var(--rule-2)" }} /></div><div className="sovval">{n}<span className="sovpct">{total ? Math.round(n / total * 100) : 0}%</span></div></div>; });
+  const bars = (items, total, hi) => items.map(([d, n]) => { const max = items[0]?.[1] || 1; const me = hi(d); return <div key={d} className="sovrow"><div className={"sovname" + (me ? " me" : "")}>{me && <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" style={{ verticalAlign: "-1px", marginRight: 5 }}><path d="m12 2 3 6.6 7 .9-5.2 4.9 1.4 7L12 18l-6.2 3.4 1.4-7L2 9.5l7-.9z" /></svg>}{d}</div><div className="sovbar"><span style={{ width: (n / max * 100).toFixed(1) + "%", background: me ? "var(--accent)" : "var(--rule-2)" }} /></div><div className="sovval">{n}<span className="sovpct">{total ? Math.round(n / total * 100) : 0}%</span></div></div>; });
+  const regionFlags = <span style={{ display: "inline-flex", gap: 4, alignItems: "center" }}>{site.regions.map(r => <Flag key={r} code={r} size={14} />)}</span>;
 
   /* narrative banner, generated from the numbers */
   const banner = (() => {
     if (!latest) return <>No scan yet. <b>Run scan now</b> to take your first reading — results land within about {eta} minutes.</>;
-    if (!prev) return <><b>{lbl(cur)} is your baseline.</b> {stats.ranking} of {stats.measured} keywords measured are on page one in {REGIONS[region]?.name}, {stats.top3} in the top three. From next month this banner reports what moved.</>;
+    if (!prev) return <><b>{lbl(cur)} is your baseline.</b> {stats.ranking} of {stats.measured} keywords measured are on page one in <Reg r={region} />, {stats.top3} in the top three. From next month this banner reports what moved.</>;
     const dir = stats.delta > 0 ? "up" : stats.delta < 0 ? "down" : "flat";
-    return <><b>{lbl(cur)} vs {lbl(prev)} in {REGIONS[region]?.name}: {stats.ranking} on page one ({dir === "flat" ? "unchanged" : (stats.delta > 0 ? "+" : "") + stats.delta}), {stats.top3} in the top three ({stats.d3 > 0 ? "+" : ""}{stats.d3 || 0}).</b> {stats.up} keywords improved, {stats.down} slipped, {stats.gained} newly on page one, {stats.lost} fell off. {stats.lost > stats.gained + 3 ? "Losses outnumber gains — open the Opportunities tab to see who took the spots and which pages to build." : stats.up + stats.gained > stats.down + stats.lost ? "A good month. Defend the top-three positions with a content refresh before competitors react." : "A quiet month. Movement usually follows published pages by four to eight weeks."} Measured from a real IP in {REGIONS[region]?.name}, no cookies, no history.</>;
+    return <><b>{lbl(cur)} vs {lbl(prev)} in <Reg r={region} />: {stats.ranking} on page one ({dir === "flat" ? "unchanged" : (stats.delta > 0 ? "+" : "") + stats.delta}), {stats.top3} in the top three ({stats.d3 > 0 ? "+" : ""}{stats.d3 || 0}).</b> {stats.up} keywords improved, {stats.down} slipped, {stats.gained} newly on page one, {stats.lost} fell off. {stats.lost > stats.gained + 3 ? "Losses outnumber gains — open the Opportunities tab to see who took the spots and which pages to build." : stats.up + stats.gained > stats.down + stats.lost ? "A good month. Defend the top-three positions with a content refresh before competitors react." : "A quiet month. Movement usually follows published pages by four to eight weeks."} Measured from a real IP in <Reg r={region} />, no cookies, no history.</>;
   })();
+  /* one AI line in the banner, from the first engine that has answers */
+  const aiLine = hasAeo && enginesPresent.length > 0 ? (() => { const e = enginesPresent[0]; const S = engineStats(e); return <span style={{ display: "inline-flex", alignItems: "center", gap: 5, marginLeft: 4 }}><EngineLogo engine={e} size={13} dark /> {ENGINE_LABELS[e]} cites you in {Math.round(S.pct)}% of buyer questions.</span>; })() : null;
 
   return (
-    <>
+    <AppShell>
       <nav className="nav"><div className="nav-in">
         <a className="brand" href="/dashboard"><div className="mark">R</div>RankPulse</a>
         <span style={{ color: "var(--ink-3)", fontSize: 13.5 }}>{site.domain}</span>
@@ -150,21 +189,44 @@ export default function Dashboard() {
       </div></nav>
 
       <div className="wrap" style={{ paddingBottom: 72 }}>
-        <div className="notice-bar"><span>ⓘ</span><div>{banner} Legend: number = position 1–10 · <b>—</b> = not in top 10 · <b>·</b> = not measured.</div></div>
-        {trialLeft !== null && <div className="notice-bar" style={{ marginTop: 10 }}><span>⏱</span><div><b>{trialLeft > 0 ? `${trialLeft} days left on your free trial.` : "Your free trial has ended."}</b> {trialLeft > 0 ? "Everything runs until it ends." : "Scans are paused until you choose a plan — your data is safe."} <a href="/billing">See plans →</a></div></div>}
-        {msg && <div className="notice-bar" style={{ marginTop: 10 }}><span>ⓘ</span><div>{msg}</div></div>}
-        {active && <div className="notice-bar" style={{ marginTop: 10 }}><span>⟳</span><div><b>Scan {latest.status} for {lbl(latest.month)}.</b> {rows.length} keywords × {site.regions.length} countries{hasAeo ? `, then ${prompts.length} AI questions` : ""} — this page refreshes itself as results land.</div></div>}
+        {/* ───── first run: the product looks alive before the first reading lands ───── */}
+        {!hasDone && (
+          <div className="welcome">
+            <div>
+              <h2>{active ? "Your first scan is running" : "Queue your first scan"}</h2>
+              <p>{active
+                ? <>Positions are measured from real IPs in each country and stream into the grid below as they land — about {eta} minutes for the full set. Leave this tab open; it refreshes itself.</>
+                : rows.length
+                  ? <>Your {rows.length} keywords are ready. One click takes the first reading in {site.regions.length} {site.regions.length === 1 ? "country" : "countries"}; results land within about {eta} minutes.</>
+                  : <>Add the keywords you want to track first, then queue a scan. Results land within minutes of the worker picking it up.</>}</p>
+              <div className="steps-inline">
+                <span className={rows.length ? "done" : ""}>{rows.length ? <CheckGlyph /> : null}{rows.length ? "Keywords added" : <a href="/keywords" style={{ color: "inherit" }}>Add keywords</a>}</span>
+                <span className={active ? "now" : ""}>{active && <span className="pulse" />}{active ? "Scanning" : "Scan"} {rows.length} keywords across {regionFlags}</span>
+                <span>Results land here</span>
+                {hasAeo && <span><EngineRow size={12} dark names={false} gap={3} />AI answers next</span>}
+              </div>
+            </div>
+            {!active && (rows.length
+              ? <button className="btn btn-primary" onClick={queueScan} disabled={queuing}>{queuing ? "Queuing…" : "Run scan"}</button>
+              : <a className="btn btn-primary" href="/keywords">Add keywords</a>)}
+          </div>
+        )}
+
+        <div className="notice-bar" style={!hasDone ? { marginTop: 12 } : {}}><span><InfoGlyph /></span><div>{banner}{aiLine} Legend: number = position 1–10 · <b>—</b> = not in top 10 · <b>·</b> = not measured.</div></div>
+        {trialLeft !== null && <div className="notice-bar" style={{ marginTop: 10 }}><span><ClockGlyph /></span><div><b>{trialLeft > 0 ? `${trialLeft} days left on your free trial.` : "Your free trial has ended."}</b> {trialLeft > 0 ? "Everything runs until it ends." : "Scans are paused until you choose a plan — your data is safe."} <a href="/billing">See plans →</a></div></div>}
+        {msg && <div className="notice-bar" style={{ marginTop: 10 }}><span><InfoGlyph /></span><div>{msg}</div></div>}
+        {active && <div className="notice-bar" style={{ marginTop: 10 }}><span><span className="pulse" /></span><div><b>Scan {latest.status} for {lbl(latest.month)}.</b> {rows.length} keywords × {site.regions.length} countries {regionFlags}{hasAeo ? <>, then {prompts.length} AI questions on <EngineRow size={12} dark names={false} gap={3} /></> : ""} — this page refreshes itself as results land.</div></div>}
 
         <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", marginTop: 18 }}>
-          <div className="seg">{site.regions.map(r => <button key={r} className={r === region ? "on" : ""} onClick={() => setRegion(r)}><span className="dot" style={{ background: RCOL[r] || "var(--accent)", marginRight: 7 }} />{REGIONS[r]?.name || r}</button>)}</div>
+          <div className="seg region-seg">{site.regions.map(r => <button key={r} className={r === region ? "on" : ""} onClick={() => setRegion(r)}><Flag code={r} size={14} />{REGIONS[r]?.name || r}</button>)}</div>
         </div>
 
         <div className="kpis">
-          <div className="kpi"><div className="l">Keywords tracked</div><div className="v">{rows.length}</div><div className="s">{REGIONS[region]?.name} · {acc?.keyword_limit} on plan</div></div>
+          <div className="kpi"><div className="l">Keywords tracked</div><div className="v">{rows.length}</div><div className="s"><Reg r={region} size={12} /> · {acc?.keyword_limit} on plan</div></div>
           <div className="kpi"><div className="l">Ranking · page one</div><div className="v" style={{ color: "var(--up)" }}>{stats.ranking}<Delta d={stats.delta} /></div><div className="s">{stats.measured ? Math.round(stats.ranking / stats.measured * 100) : 0}% of {stats.measured} measured</div></div>
           <div className="kpi"><div className="l">Top 3</div><div className="v" style={{ color: "var(--up)" }}>{stats.top3}<Delta d={stats.d3} /></div><div className="s">the positions that get clicks</div></div>
           <div className="kpi"><div className="l">Avg position</div><div className="v">{stats.avg}</div><div className="s">where ranking</div></div>
-          {hasAeo && enginesPresent.length > 0 && <div className="kpi"><div className="l">AI citation rate</div><div className="v" style={{ color: "var(--accent-ink)" }}>{Math.round(engineStats(enginesPresent[0]).pct)}%</div><div className="s">{ENGINE_LABELS[enginesPresent[0]]} · {lbl(aiMonth)}</div></div>}
+          {hasAeo && enginesPresent.length > 0 && <div className="kpi"><div className="l">AI citation rate</div><div className="v" style={{ color: "var(--accent-ink)" }}>{Math.round(engineStats(enginesPresent[0]).pct)}%</div><div className="s" style={{ display: "flex", alignItems: "center", gap: 5 }}><EngineLogo engine={enginesPresent[0]} size={13} dark />{ENGINE_LABELS[enginesPresent[0]]} · {lbl(aiMonth)}</div></div>}
         </div>
 
         <div className="tabs">
@@ -188,9 +250,9 @@ export default function Dashboard() {
                 const lv = latestVal(row, region);
                 return (<tr key={row.id} className="kw" onClick={() => setOpen(row.id)}>
                   <td><div className="kwname">{row.phrase}</div>{row.grp && row.grp !== "General" && <div className="kwsub">{row.grp}</div>}</td>
-                  {months.map(m => <td key={m} className="n">{cell(val(row, m, region))}</td>)}
+                  {months.map(m => <td key={m} className="n">{liveCell(val(row, m, region), m === cur)}</td>)}
                   <td className="n">{d !== null ? <Delta d={d} /> : a === 0 && b > 0 ? <span className="delta up">new</span> : a > 0 && b === 0 ? <span className="delta down">lost</span> : <span className="pos na">·</span>}</td>
-                  <td>{lv === null ? <span className="chip" style={{ background: "var(--paper-3)", color: "var(--ink-3)" }}>Pending</span> : lv > 0 ? <span className="chip ok">Present</span> : <span className="chip err">Absent</span>}</td>
+                  <td>{lv === null ? (active ? <span className="chip warn">Measuring…</span> : <span className="chip" style={{ background: "var(--paper-3)", color: "var(--ink-3)" }}>Pending</span>) : lv > 0 ? <span className="chip ok">Present</span> : <span className="chip err">Absent</span>}</td>
                   <td><span className={"pill " + (TABS.find(t => t.k === (row.tab || "commercial"))?.pill)}>{TABS.find(t => t.k === (row.tab || "commercial"))?.label}</span></td>
                 </tr>);
               })}
@@ -203,15 +265,17 @@ export default function Dashboard() {
         {view === "ai" && (<>
           <div className="toolbar"><div className="seg"><button className={aiMode === "measure" ? "on" : ""} onClick={() => setAiMode("measure")}>Measure — where you stand</button><button className={aiMode === "improve" ? "on" : ""} onClick={() => setAiMode("improve")}>Improve — what to fix</button></div></div>
           {aiMode === "improve" && <AeoPanel site={site} acc={acc} rankingCount={stats.ranking} top3Count={stats.top3} keywordCount={rows.length} />}
-          {aiMode === "measure" && !hasAeo && <div className="card pad" style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 18, alignItems: "center" }}><div><div style={{ fontWeight: 700 }}>See whether ChatGPT, Perplexity, Gemini, Claude and Google AI cite you.</div><div style={{ color: "var(--ink-2)", fontSize: 14, marginTop: 4 }}>Real buyer questions by funnel stage, five engines, a fix list ranked by payoff. On Growth and above.</div></div><a className="btn btn-primary" href="/billing">Upgrade</a></div>}
-          {aiMode === "measure" && hasAeo && !enginesPresent.length && <div className="notice-bar"><span>🤖</span><div><b>No AI results yet.</b> {prompts.length ? `${prompts.length} buyer questions are ready — they run with your next scan.` : <>Add buyer questions under <a href="/keywords#ai">Keywords → AI questions</a>, then run a scan.</>}</div></div>}
+          {aiMode === "measure" && !hasAeo && <div className="card pad" style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 18, alignItems: "center" }}><div><div style={{ fontWeight: 700 }}>See whether the answer engines cite you.</div><div style={{ margin: "10px 0 8px" }}><EngineRow size={16} dark names gap={14} /></div><div style={{ color: "var(--ink-2)", fontSize: 14 }}>Real buyer questions by funnel stage, five engines, a fix list ranked by payoff. On Growth and above.</div></div><a className="btn btn-primary" href="/billing">Upgrade</a></div>}
+          {aiMode === "measure" && hasAeo && !enginesPresent.length && <div className="notice-bar"><span><EngineRow size={13} dark names={false} gap={3} /></span><div><b>No AI results yet.</b> {prompts.length ? `${prompts.length} buyer questions are ready — they run with your next scan.` : <>Add buyer questions under <a href="/keywords#ai">Keywords → AI questions</a>, then run a scan.</>}</div></div>}
           {aiMode === "measure" && hasAeo && enginesPresent.length > 0 && (() => {
             const e = enginesPresent.includes(engine) ? engine : enginesPresent[0];
             const S = engineStats(e);
             const st = {}; S.a.forEach(c => { const k = promptById[c.prompt_id]?.stage || "Other"; st[k] = st[k] || { n: 0, c: 0 }; st[k].n++; if (c.cited) st[k].c++; });
             const gap = S.a.filter(c => !c.cited && orgPosOf(c.prompt_id) > 0).sort((a, b) => orgPosOf(a.prompt_id) - orgPosOf(b.prompt_id));
+            const EName = ({ x, size = 16 }) => <span style={{ display: "inline-flex", alignItems: "center", gap: 6, verticalAlign: "middle" }}><EngineLogo engine={x} size={size} dark />{ENGINE_LABELS[x]}</span>;
             return (<>
-              <div className="toolbar" style={{ marginTop: 0 }}><div className="seg">{enginesPresent.map(x => <button key={x} className={x === e ? "on" : ""} onClick={() => setEngine(x)}>{ENGINE_LABELS[x]}</button>)}</div><span style={{ color: "var(--ink-3)", fontSize: 13 }}>{lbl(aiMonth)}</span></div>
+              <div className="toolbar" style={{ marginTop: 0 }}><div className="seg engine-seg">{enginesPresent.map(x => <button key={x} className={x === e ? "on" : ""} onClick={() => setEngine(x)}><EngineLogo engine={x} size={16} dark />{ENGINE_LABELS[x]}</button>)}</div><span style={{ color: "var(--ink-3)", fontSize: 13 }}>{lbl(aiMonth)}</span></div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "16px 0 -6px" }}><EngineLogo engine={e} size={22} dark /><h2 style={{ fontSize: 17, margin: 0 }}>{ENGINE_LABELS[e]}</h2><span style={{ color: "var(--ink-3)", fontSize: 12.5 }}>· {site.domain} · {lbl(aiMonth)}</span></div>
               <div className="kpis">
                 <div className="kpi"><div className="l">Questions tracked</div><div className="v">{S.rows.length}</div><div className="s">{S.a.length} produced an AI answer</div></div>
                 <div className="kpi"><div className="l">Citation rate</div><div className="v" style={{ color: "var(--up)" }}>{Math.round(S.pct)}%</div><div className="s">{S.cited.length} of {S.a.length} answers cite you</div></div>
@@ -219,11 +283,11 @@ export default function Dashboard() {
                 <div className="kpi"><div className="l">Named in answer</div><div className="v">{S.named.length}</div><div className="s">{S.first} answers cite you first</div></div>
               </div>
               <div className="card pad"><h2 style={{ fontSize: 15 }}>Citation rate by answer engine — same {S.rows.length} questions</h2><p style={{ color: "var(--ink-3)", fontSize: 12.5, margin: "6px 0 14px" }}>How often each engine cites {site.domain} when answering the questions your buyers ask.</p>
-                <div className="sov">{enginesPresent.map(x => { const s = engineStats(x); const col = s.pct >= 50 ? "var(--up)" : s.pct >= 30 ? "var(--warn)" : "var(--down)"; return <div key={x} className="sovrow"><div className="sovname" style={x === e ? { fontWeight: 700 } : {}}>{ENGINE_LABELS[x]}</div><div className="sovbar"><span style={{ width: s.pct.toFixed(0) + "%", background: col }} /></div><div className="sovval">{s.cited.length}/{s.a.length}<span className="sovpct">{s.pct.toFixed(0)}%</span></div></div>; })}</div></div>
-              {Object.keys(st).length > 0 && <div className="card pad" style={{ marginTop: 16 }}><h2 style={{ fontSize: 15 }}>Where you win across the buyer journey — {ENGINE_LABELS[e]}</h2><p style={{ color: "var(--ink-3)", fontSize: 12.5, margin: "6px 0 14px" }}>Citation rate by funnel stage. Green = strong, red = blind spot.</p>
+                <div className="sov">{enginesPresent.map(x => { const s = engineStats(x); const col = s.pct >= 50 ? "var(--up)" : s.pct >= 30 ? "var(--warn)" : "var(--down)"; return <div key={x} className="sovrow"><div className="sovname" style={{ display: "inline-flex", alignItems: "center", gap: 7, ...(x === e ? { fontWeight: 700, color: "#fff" } : {}) }}><EngineLogo engine={x} size={15} dark />{ENGINE_LABELS[x]}</div><div className="sovbar"><span style={{ width: s.pct.toFixed(0) + "%", background: col }} /></div><div className="sovval">{s.cited.length}/{s.a.length}<span className="sovpct">{s.pct.toFixed(0)}%</span></div></div>; })}</div></div>
+              {Object.keys(st).length > 0 && <div className="card pad" style={{ marginTop: 16 }}><h2 style={{ fontSize: 15 }}>Where you win across the buyer journey — <EName x={e} /></h2><p style={{ color: "var(--ink-3)", fontSize: 12.5, margin: "6px 0 14px" }}>Citation rate by funnel stage. Green = strong, red = blind spot.</p>
                 <div className="sov">{STAGES.filter(k => st[k]).map(k => { const b = st[k]; const pct = b.n ? b.c / b.n * 100 : 0; const col = pct >= 50 ? "var(--up)" : pct >= 25 ? "var(--warn)" : "var(--down)"; return <div key={k} className="sovrow"><div className="sovname">{k}</div><div className="sovbar"><span style={{ width: pct.toFixed(0) + "%", background: col }} /></div><div className="sovval">{b.c}/{b.n}<span className="sovpct">{pct.toFixed(0)}%</span></div></div>; })}</div></div>}
-              <div className="card pad" style={{ marginTop: 16 }}><h2 style={{ fontSize: 15 }}>Share of voice — who {ENGINE_LABELS[e]} cites in your market</h2><p style={{ color: "var(--ink-3)", fontSize: 12.5, margin: "6px 0 14px" }}>Across {S.a.length} answers, how often each domain is used as a source.</p><div className="sov">{bars(S.sov, S.total, d => d.includes(site.domain))}</div></div>
-              {gap.length > 0 && <div className="card pad" style={{ marginTop: 16, borderColor: "color-mix(in srgb,var(--warn) 40%,var(--rule))" }}><h2 style={{ fontSize: 15 }}>⚡ Priority fixes — you rank on Google, but {ENGINE_LABELS[e]} doesn't cite you</h2><p style={{ color: "var(--ink-3)", fontSize: 12.5, margin: "6px 0 12px" }}>{gap.length} questions where {site.domain} is already on Google page one, yet this engine chose other sources. The page ranks — it just isn't answer-shaped. Direct answer up top, question-shaped H2s, FAQ schema.</p>
+              <div className="card pad" style={{ marginTop: 16 }}><h2 style={{ fontSize: 15 }}>Share of voice — who <EName x={e} /> cites in your market</h2><p style={{ color: "var(--ink-3)", fontSize: 12.5, margin: "6px 0 14px" }}>Across {S.a.length} answers, how often each domain is used as a source.</p><div className="sov">{bars(S.sov, S.total, d => d.includes(site.domain))}</div></div>
+              {gap.length > 0 && <div className="card pad" style={{ marginTop: 16, borderColor: "color-mix(in srgb,var(--warn) 40%,var(--rule))" }}><h2 style={{ fontSize: 15 }}>Priority fixes — you rank on Google, but <EName x={e} /> doesn't cite you</h2><p style={{ color: "var(--ink-3)", fontSize: 12.5, margin: "6px 0 12px" }}>{gap.length} questions where {site.domain} is already on Google page one, yet this engine chose other sources. The page ranks — it just isn't answer-shaped. Direct answer up top, question-shaped H2s, FAQ schema.</p>
                 <div className="tablewrap"><table style={{ minWidth: 640 }}><thead><tr><th>Question</th><th className="n">Google organic</th><th>Cited instead</th></tr></thead><tbody>{gap.map(c => <tr key={c.id}><td>{promptById[c.prompt_id]?.prompt}</td><td className="n"><span className={"pos " + (orgPosOf(c.prompt_id) <= 3 ? "top" : "mid")}>#{orgPosOf(c.prompt_id)}</span></td><td>{(c.comps || []).slice(0, 3).map(d => <span key={d} className="chip" style={{ background: "var(--paper-3)", color: "var(--ink-2)", marginRight: 4 }}>{d}</span>)}</td></tr>)}</tbody></table></div></div>}
               <div className="tablewrap" style={{ marginTop: 16 }}><table style={{ minWidth: 820 }}><thead><tr><th>Question</th><th>Stage</th><th className="n">Cited (rank / sources)</th><th className="n">Named</th><th className="n">Google</th><th>Competitors cited</th></tr></thead>
                 <tbody>{[...S.rows].sort((a, b) => (a.cited ? a.src_rank : 999) - (b.cited ? b.src_rank : 999)).map(c => <tr key={c.id}><td style={{ fontWeight: 550 }}>{promptById[c.prompt_id]?.prompt}</td><td style={{ fontSize: 12, color: "var(--ink-3)" }}>{promptById[c.prompt_id]?.stage}</td><td className="n">{!c.answered ? <span className="pos na">·</span> : c.cited ? <><span className={"pos " + (c.src_rank <= 2 ? "top" : "mid")}>#{c.src_rank}</span><span style={{ fontSize: 12, color: "var(--ink-3)" }}> / {c.sources}</span></> : <span className="chip err">Not cited</span>}</td><td className="n">{c.mention ? <span className="chip ok">Named</span> : <span className="pos na">—</span>}</td><td className="n">{orgPosOf(c.prompt_id) ? <span className="mono" style={{ fontSize: 12 }}>#{orgPosOf(c.prompt_id)}</span> : <span className="pos na">—</span>}</td><td>{(c.comps || []).slice(0, 3).map(d => <span key={d} className="chip" style={{ background: "var(--paper-3)", color: "var(--ink-2)", marginRight: 4 }}>{d}</span>)}</td></tr>)}</tbody></table></div>
@@ -234,7 +298,7 @@ export default function Dashboard() {
 
         {/* ════════ OPPORTUNITIES ════════ */}
         {view === "opps" && (<>
-          {!opps.length ? <div className="notice-bar"><span>🔎</span><div><b>Opportunities appear after your first scan.</b> We expand your keywords through Google Autocomplete, drop what you already track, and verify the best against live page one so you can see who holds each spot.</div></div> : (<>
+          {!opps.length ? <div className="notice-bar"><span><SearchGlyph /></span><div><b>Opportunities appear after your first scan.</b> We expand your keywords through Google Autocomplete, drop what you already track, and verify the best against live page one so you can see who holds each spot.</div></div> : (<>
             <div className="kpis">
               <div className="kpi"><div className="l">New keywords found</div><div className="v" style={{ color: "var(--accent-ink)" }}>{opps.length}</div><div className="s">not in your tracked list</div></div>
               <div className="kpi"><div className="l">Verified on page one</div><div className="v" style={{ color: "var(--up)" }}>{opps.filter(o => o.position !== null).length}</div><div className="s">{opps.filter(o => o.position > 0).length} you already rank for</div></div>
@@ -254,19 +318,19 @@ export default function Dashboard() {
       <div className={"scrim" + (openRow ? " on" : "")} onClick={() => setOpen(null)} />
       <aside className={"drawer" + (openRow ? " open" : "")} aria-hidden={!openRow}>
         {openRow && (<>
-          <div className="dhead"><div><span className={"pill " + (TABS.find(t => t.k === (openRow.tab || "commercial"))?.pill)}>{TABS.find(t => t.k === (openRow.tab || "commercial"))?.label}</span><h2 style={{ marginTop: 8, fontSize: 18 }}>{openRow.phrase}</h2><div style={{ color: "var(--ink-3)", fontSize: 12, marginTop: 3 }}>{openRow.grp || "General"}</div></div><button className="x" onClick={() => setOpen(null)}>✕</button></div>
+          <div className="dhead"><div><span className={"pill " + (TABS.find(t => t.k === (openRow.tab || "commercial"))?.pill)}>{TABS.find(t => t.k === (openRow.tab || "commercial"))?.label}</span><h2 style={{ marginTop: 8, fontSize: 18 }}>{openRow.phrase}</h2><div style={{ color: "var(--ink-3)", fontSize: 12, marginTop: 3 }}>{openRow.grp || "General"}</div></div><button className="x" onClick={() => setOpen(null)} aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 6l12 12M18 6 6 18" /></svg></button></div>
           <div className="dbody">
             <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: ".05em", color: "var(--ink-3)", fontWeight: 650, marginBottom: 8 }}>{lbl(cur)} — every country</div>
-            <div className="rgrid">{site.regions.map(r => { const v = val(openRow, cur, r); return <div key={r} className="rcell"><div className="k"><span className="dot" style={{ background: RCOL[r] }} />{REGIONS[r]?.name}</div><div className="v" style={{ color: v > 0 ? (v <= 3 ? "var(--up)" : "var(--ink)") : "var(--ink-3)" }}>{v === null ? "·" : v === 0 ? "—" : v}</div></div>; })}</div>
-            <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: ".05em", color: "var(--ink-3)", fontWeight: 650, margin: "22px 0 8px" }}>Position over time — {REGIONS[region]?.name}</div>
+            <div className="rgrid">{site.regions.map(r => { const v = val(openRow, cur, r); return <div key={r} className="rcell"><div className="k" style={{ display: "flex", alignItems: "center", gap: 6 }}><Flag code={r} size={14} />{REGIONS[r]?.name}</div><div className="v" style={{ color: v > 0 ? (v <= 3 ? "var(--up)" : "var(--ink)") : "var(--ink-3)" }}>{v === null ? (active ? <span className="skel" /> : "·") : v === 0 ? "—" : v}</div></div>; })}</div>
+            <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: ".05em", color: "var(--ink-3)", fontWeight: 650, margin: "22px 0 8px", display: "flex", alignItems: "center", gap: 6 }}>Position over time — <Reg r={region} size={12} /></div>
             <div className="spark">{months.map(m => { const v = val(openRow, m, region); const h = v === null ? 3 : v === 0 ? 4 : (11 - v) * 10; return <span key={m} className={v === null || v === 0 ? "none" : ""} style={{ height: h + "%" }} title={`${lbl(m)}: ${v === null ? "not measured" : v === 0 ? "not on page 1" : "#" + v}`} />; })}</div>
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10.5, color: "var(--ink-3)", marginTop: 4 }}>{months.map(m => <span key={m}>{lbl(m)}</span>)}</div>
             <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: ".05em", color: "var(--ink-3)", fontWeight: 650, margin: "22px 0 8px" }}>Month × region</div>
-            <div className="tablewrap" style={{ border: 0 }}><table className="mtable"><thead><tr><th>Month</th>{site.regions.map(r => <th key={r} className="n">{r}</th>)}</tr></thead><tbody>{months.map(m => <tr key={m}><td>{lbl(m)}</td>{site.regions.map(r => <td key={r}>{cell(val(openRow, m, r))}</td>)}</tr>)}</tbody></table></div>
+            <div className="tablewrap" style={{ border: 0 }}><table className="mtable"><thead><tr><th>Month</th>{site.regions.map(r => <th key={r} className="n"><span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}><Flag code={r} size={12} />{r}</span></th>)}</tr></thead><tbody>{months.map(m => <tr key={m}><td>{lbl(m)}</td>{site.regions.map(r => <td key={r}>{liveCell(val(openRow, m, r), m === cur)}</td>)}</tr>)}</tbody></table></div>
           </div>
         </>)}
       </aside>
-      <style>{`.sov{display:flex;flex-direction:column;gap:7px}.sovrow{display:grid;grid-template-columns:200px 1fr 90px;gap:12px;align-items:center;font-size:13px}.sovname{color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sovname.me{color:var(--accent-ink);font-weight:700}.sovbar{height:10px;background:var(--paper-3);border-radius:5px;overflow:hidden}.sovbar span{display:block;height:100%;border-radius:5px}.sovval{font-family:var(--mono);font-weight:700;text-align:right;font-size:12.5px}.sovpct{color:var(--ink-3);font-weight:500;margin-left:5px}@media(max-width:700px){.sovrow{grid-template-columns:110px 1fr 70px}}`}</style>
-    </>
+      <style>{`.sov{display:flex;flex-direction:column;gap:7px}.sovrow{display:grid;grid-template-columns:200px 1fr 90px;gap:12px;align-items:center;font-size:13px}.sovname{color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sovname.me{color:var(--accent-ink);font-weight:700}.sovbar{height:10px;background:var(--paper-3);border-radius:5px;overflow:hidden}.sovbar span{display:block;height:100%;border-radius:5px}.sovval{font-family:var(--mono);font-weight:700;text-align:right;font-size:12.5px}.sovpct{color:var(--ink-3);font-weight:500;margin-left:5px}.steps-inline .pulse,.notice-bar .pulse{width:8px;height:8px;border-radius:50%;background:#67E8F9;position:relative;flex:none;display:inline-block}.steps-inline .pulse::after,.notice-bar .pulse::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid #67E8F9;opacity:.6;animation:ping 1.4s ease-out infinite}.notice-bar>span{display:inline-flex;align-items:center;gap:3px}@media(max-width:700px){.sovrow{grid-template-columns:110px 1fr 70px}}@media(prefers-reduced-motion:reduce){.steps-inline .pulse::after,.notice-bar .pulse::after{animation:none}}`}</style>
+    </AppShell>
   );
 }

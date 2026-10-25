@@ -3,6 +3,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { sb } from "../../lib/supabase";
 import { PLANS, price, fmt, guessCurrency } from "../../lib/plans";
+import AppShell from "../../components/AppShell";
+import EngineLogo, { ENGINES } from "../../components/EngineLogo";
+
+/* perks that spell out engine names in brackets drop the bracket — the logo row under the list carries it */
+const perkText = x => x.replace(/\s*\([^)]*(?:ChatGPT|Perplexity|Gemini|Claude|Google AI)[^)]*\)/, "");
 
 export default function Billing() {
   const router = useRouter();
@@ -43,7 +48,7 @@ export default function Billing() {
   }
 
   return (
-    <>
+    <AppShell>
       <nav className="nav"><div className="nav-in"><a className="brand" href="/dashboard"><div className="mark">R</div>RankPulse</a><div className="spacer" /><a className="btn btn-ghost" href="/dashboard">← Dashboard</a></div></nav>
       <div className="wrap" style={{ paddingTop: 40, paddingBottom: 80 }}>
         <h1 style={{ fontSize: 30 }}>Choose a plan</h1>
@@ -57,6 +62,7 @@ export default function Billing() {
           {Object.entries(PLANS).map(([k, p]) => {
             const current = acc?.plan === k;
             const perMonth = cycle === "annual" ? Math.round(price(p, cur, "annual") / 12) : price(p, cur, "monthly");
+            const dim = p.hot ? "rgba(255,255,255,.55)" : "var(--ink-3)";
             return (
               <div key={k} className={"plan2" + (p.hot ? " hot" : "")}>
                 {p.hot && !current && <div className="tag">Most popular</div>}
@@ -64,7 +70,13 @@ export default function Billing() {
                 <div className="pp2">{fmt(perMonth, cur)}<small>/mo</small></div>
                 <div style={{ fontSize: 12.5, color: p.hot ? "rgba(255,255,255,.6)" : "var(--ink-3)" }}>{cycle === "annual" ? `${fmt(price(p, cur, "annual"), cur)} billed yearly` : "billed monthly, cancel any time"}</div>
                 <div className="desc">{p.desc}</div>
-                <ul>{p.perks.map(x => <li key={x}>{x}</li>)}</ul>
+                <ul>{p.perks.map(x => <li key={x}>{perkText(x)}</li>)}</ul>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px 14px", flexWrap: "wrap", margin: "-8px 0 24px", paddingTop: 14, borderTop: "1px solid " + (p.hot ? "rgba(255,255,255,.1)" : "var(--rule)"), fontSize: 13, fontWeight: 600 }}>
+                  <span style={{ color: dim, fontWeight: 600 }}>AI engines included:</span>
+                  {p.aeo
+                    ? Object.keys(ENGINES).map(e => <EngineLogo key={e} engine={e} size={16} dark withName />)
+                    : <span style={{ display: "inline-flex", alignItems: "center", gap: 6, color: p.hot ? "rgba(255,255,255,.75)" : "var(--ink-2)", fontWeight: 500 }}><EngineLogo engine="google" size={16} dark />Google rankings only</span>}
+                </div>
                 <button className={"btn " + (p.hot ? "" : "btn-primary")} disabled={!!busy || current} onClick={() => choose(k)}>{current ? "Your plan" : busy === k ? "Opening checkout…" : `Choose ${p.name}`}</button>
               </div>
             );
@@ -72,6 +84,6 @@ export default function Billing() {
         </div>
         <p style={{ color: "var(--ink-3)", fontSize: 12.5, marginTop: 20 }}>Payments by Razorpay — cards, UPI, net banking, international cards. GST extra for Indian billing. Annual plans run 12 months; full refund within 14 days of first charge.</p>
       </div>
-    </>
+    </AppShell>
   );
 }

@@ -47,7 +47,7 @@
 
 /* engine logos row (text marks, no trademarks) */
 .engines{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
-.engines span{font-family:var(--disp);font-weight:700;font-size:13px;padding:8px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:#fff}
+.engines > span{font-family:var(--disp);font-weight:700;font-size:13px;padding:8px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:#fff}
 
 /* white-patch guard: a section is never invisible for long */
 .rv{will-change:opacity,transform}
@@ -96,9 +96,9 @@
 
 /* engines row: light weight, copper highlight, never wraps awkwardly */
 .engines{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:22px;font-size:13px;color:rgba(255,255,255,.55);font-weight:400}
-.engines .lab{margin-right:6px;letter-spacing:.06em;text-transform:uppercase;font-size:11px;font-weight:600;color:rgba(255,255,255,.4)}
-.engines span.e{font-family:var(--body);font-weight:500;font-size:13px;padding:5px 11px;border-radius:8px;border:1px solid rgba(226,167,94,.28);background:var(--copper-weak);color:#F3D5AE}
-.engines span.e b{color:var(--copper);font-weight:700;margin-right:5px}
+.engines > .lab{margin-right:6px;letter-spacing:.06em;text-transform:uppercase;font-size:11px;font-weight:600;color:rgba(255,255,255,.4)}
+.engines > span.e{font-family:var(--body);font-weight:500;font-size:13px;padding:5px 11px;border-radius:8px;border:1px solid rgba(226,167,94,.28);background:var(--copper-weak);color:#F3D5AE}
+.engines > span.e b{color:var(--copper);font-weight:700;margin-right:5px}
 
 /* hero headline reveal, word by word */
 .hw{display:inline-block;opacity:0;transform:translateY(14px);animation:hw .7s cubic-bezier(.2,.7,.2,1) forwards}
@@ -114,5 +114,5 @@
 @media(max-width:900px){.hero2{grid-template-columns:1fr}.hero-wrap .mock{transform:none}.proof{margin-top:0}}
 /* per-word gradient so the animated spans keep their fill */
 .hw.hl{background:linear-gradient(90deg,#A5B4FC,#67E8F9);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.engines span.e{padding:4px 9px;font-size:12.5px}
-.engines .lab{font-size:10.5px}
+.engines > span.e{padding:4px 9px;font-size:12.5px}
+.engines > .lab{font-size:10.5px}

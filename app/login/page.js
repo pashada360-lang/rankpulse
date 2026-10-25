@@ -2,6 +2,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { sb } from "../../lib/supabase";
+import { EngineRow } from "../../components/EngineLogo";
+
+const POINTS = [
+  "Real positions, from an IP inside each country you sell to",
+  "What moved since last month, on every keyword",
+  "Whether AI assistants recommend you when buyers ask",
+];
 
 export default function Login() {
   const router = useRouter();
@@ -25,28 +32,43 @@ export default function Login() {
   }
 
   return (
-    <div className="center">
-      <div className="brand" style={{ marginBottom: 26 }}><div className="mark">R</div>RankPulse</div>
-      <div className="card pad">
-        <h2 style={{ fontSize: 21 }}>Sign in</h2>
-        <form onSubmit={submit} style={{ marginTop: 20 }}>
-          <div className="field">
-            <label>Email</label>
-            <input type="email" value={f.email} onChange={set("email")} required />
+    <div className="band" style={{ minHeight: "100vh" }}>
+      <div className="orb a" /><div className="orb b" />
+      <div className="signup-grid" style={{ maxWidth: 1080, margin: "0 auto", padding: "40px 22px", display: "grid", gridTemplateColumns: "1fr 440px", gap: 48, alignItems: "center", minHeight: "100vh" }}>
+        <div style={{ color: "#fff" }}>
+          <a className="brand" href="/" style={{ color: "#fff" }}><div className="mark">R</div>RankPulse</a>
+          <h1 className="disp" style={{ fontSize: "clamp(30px,4vw,46px)", marginTop: 34, lineHeight: 1.08, maxWidth: "16ch" }}>See what moved this month.</h1>
+          <ul className="check" style={{ marginTop: 24 }}>
+            {POINTS.map(x => <li key={x} className="ok" style={{ color: "rgba(255,255,255,.82)" }}>{x}</li>)}
+          </ul>
+          <div style={{ marginTop: 30 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", color: "#A5B4FC" }}>Measured on</div>
+            <div style={{ marginTop: 10, fontSize: 13.5, fontWeight: 600, color: "rgba(255,255,255,.85)" }}><EngineRow dark names size={16} gap={16} /></div>
           </div>
-          <div className="field">
-            <label>Password</label>
-            <input type="password" value={f.password} onChange={set("password")} required />
-          </div>
-          {err && <div className="note bad" style={{ marginBottom: 14 }}>{err}</div>}
-          <button className="btn btn-primary" style={{ width: "100%" }} disabled={busy}>
-            {busy ? "Signing in…" : "Sign in"}
-          </button>
-        </form>
+        </div>
+        <div className="card pad" style={{ background: "#fff", color: "#15172B" }}>
+          <h2 style={{ fontSize: 22 }}>Sign in</h2>
+          <p style={{ color: "var(--ink-3)", fontSize: 13.5, margin: "6px 0 20px" }}>Pick up where you left off.</p>
+          <form onSubmit={submit}>
+            <div className="field">
+              <label>Email</label>
+              <input type="email" value={f.email} onChange={set("email")} required placeholder="you@acme.com" autoFocus />
+            </div>
+            <div className="field">
+              <label>Password</label>
+              <input type="password" value={f.password} onChange={set("password")} required />
+            </div>
+            {err && <div className="note bad" style={{ marginBottom: 14 }}>{err}</div>}
+            <button className="btn btn-primary" style={{ width: "100%", padding: 12, fontSize: 15 }} disabled={busy}>
+              {busy ? "Signing in…" : "Sign in"}
+            </button>
+          </form>
+          <p style={{ textAlign: "center", marginTop: 16, fontSize: 13, color: "var(--ink-3)" }}>
+            New here? <a href="/signup">Create an account</a>
+          </p>
+        </div>
       </div>
-      <p style={{ textAlign: "center", marginTop: 16, fontSize: 13.5, color: "var(--ink-3)" }}>
-        New here? <a href="/signup">Create an account</a>
-      </p>
+      <style>{`@media(max-width:860px){.signup-grid{grid-template-columns:1fr!important;min-height:auto!important}}`}</style>
     </div>
   );
 }

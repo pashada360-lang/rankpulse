@@ -95,7 +95,7 @@ td.n,th.n{text-align:center;font-variant-numeric:tabular-nums}
 .note.info{background:var(--accent-weak);border-color:color-mix(in srgb,var(--accent) 28%,var(--rule));color:var(--ink)}
 .note.bad{background:var(--down-bg);border-color:color-mix(in srgb,var(--down) 32%,var(--rule));color:var(--ink)}
 .regsel{display:flex;gap:8px;flex-wrap:wrap}
-.regsel label{display:flex;align-items:center;gap:7px;border:1px solid var(--rule);border-radius:9px;padding:9px 13px;margin:0;cursor:pointer;font-size:14px;color:var(--ink);font-weight:550}
+.regsel label{display:flex;align-items:center;gap:9px;border:1px solid var(--rule);border-radius:9px;padding:9px 13px;margin:0;cursor:pointer;font-size:14px;color:var(--ink);font-weight:550}
 .regsel input{width:auto}
 .regsel label.on{border-color:var(--accent);background:var(--accent-weak)}
 .seg{display:inline-flex;background:var(--paper-2);border:1px solid var(--rule);border-radius:10px;padding:3px;gap:2px}

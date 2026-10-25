@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { sb } from "../../lib/supabase";
 import { PLANS } from "../../lib/plans";
 import { STAGES, defaultPrompts } from "../../lib/ai-prompts";
+import AppShell from "../../components/AppShell";
+import { EngineRow } from "../../components/EngineLogo";
 
 const TABS = [["commercial", "Commercial"], ["priority", "Priority"], ["longtail", "Long tail"]];
 
@@ -54,10 +56,10 @@ export default function Keywords() {
   async function removePrompt(id) { await sb().from("ai_prompts").delete().eq("id", id); load(); }
   async function restage(id, stage) { await sb().from("ai_prompts").update({ stage }).eq("id", id); load(); }
 
-  if (!site) return <div className="center"><p style={{ color: "var(--ink-3)" }}>Loading…</p></div>;
+  if (!site) return <AppShell><div className="center"><span className="skel" style={{ width: 180 }} /></div></AppShell>;
 
   return (
-    <>
+    <AppShell>
       <nav className="nav"><div className="nav-in"><a className="brand" href="/dashboard"><div className="mark">R</div>RankPulse</a><span style={{ color: "var(--ink-3)", fontSize: 13.5 }}>{site.domain}</span><div className="spacer" /><a className="btn btn-ghost" href="/dashboard">← Dashboard</a></div></nav>
       <div className="wrap" style={{ paddingTop: 24, paddingBottom: 72, maxWidth: 980 }}>
         <h1 style={{ fontSize: 24 }}>Keywords</h1>
@@ -76,8 +78,8 @@ export default function Keywords() {
           <tbody>{kws.map(k => <tr key={k.id}><td style={{ fontWeight: 550 }}>{k.phrase}</td><td style={{ color: "var(--ink-2)" }}>{k.grp || "General"}</td><td><select value={k.tab || "commercial"} onChange={e => retab(k.id, e.target.value)} style={{ width: "auto", padding: "5px 8px", fontSize: 13 }}>{TABS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select></td><td style={{ textAlign: "right" }}><button className="btn btn-ghost" style={{ padding: "5px 10px", fontSize: 12.5 }} onClick={() => remove(k.id)}>Remove</button></td></tr>)}</tbody></table></div>
 
         {/* ───── AI questions ───── */}
-        <h1 id="ai" style={{ fontSize: 24, marginTop: 48 }}>AI questions</h1>
-        <p style={{ color: "var(--ink-2)", marginTop: 6, maxWidth: "70ch" }}>Nobody types keywords into ChatGPT — they ask questions. These are put to ChatGPT, Perplexity, Gemini, Claude and Google AI on every scan, and we record whether your site is cited. {prompts.length} of {promptLimit}.</p>
+        <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap", marginTop: 48 }}><h1 id="ai" style={{ fontSize: 24 }}>AI questions</h1><EngineRow size={18} dark names={false} gap={8} /></div>
+        <p style={{ color: "var(--ink-2)", marginTop: 6, maxWidth: "70ch" }}>Buyers ask AI questions, not keywords. Each one is put to every engine above on every scan, and we record whether your site is cited. {prompts.length} of {promptLimit}.</p>
         {!hasAeo && <div className="note info" style={{ marginTop: 12 }}>AI-answer tracking runs on the <b>Growth</b> plan and above. You can prepare questions now; they'll run as soon as you upgrade. <a href="/billing">See plans →</a></div>}
         <div className="card pad" style={{ marginTop: 18 }}>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
@@ -94,6 +96,6 @@ export default function Keywords() {
           <tbody>{prompts.map(p => <tr key={p.id}><td style={{ fontWeight: 550 }}>{p.prompt}</td><td><select value={p.stage} onChange={e => restage(p.id, e.target.value)} style={{ width: "auto", padding: "5px 8px", fontSize: 13 }}>{STAGES.map(s => <option key={s}>{s}</option>)}</select></td><td style={{ textAlign: "right" }}><button className="btn btn-ghost" style={{ padding: "5px 10px", fontSize: 12.5 }} onClick={() => removePrompt(p.id)}>Remove</button></td></tr>)}
             {!prompts.length && <tr><td colSpan={3} style={{ padding: 24, textAlign: "center", color: "var(--ink-3)" }}>No questions yet — add the suggested set to start.</td></tr>}</tbody></table></div>
       </div>
-    </>
+    </AppShell>
   );
 }
