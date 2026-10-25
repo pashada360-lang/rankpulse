@@ -74,3 +74,45 @@
 .hero-wrap .mock{transform:perspective(1600px) rotateY(-7deg) rotateX(2deg)}
 .hero-wrap .mock:hover{transform:perspective(1600px) rotateY(0) rotateX(0)}
 .dark-stage{background:radial-gradient(900px 500px at 50% 0%,rgba(91,91,214,.18),transparent 60%),var(--ink-0);color:#fff}
+
+/* ═══ v6 — copper accent, bigger header, tighter rhythm, hero focus ═══ */
+:root{--copper:#E2A75E;--copper-weak:rgba(226,167,94,.16)}
+.mnav-in{padding:18px 22px;gap:26px}
+.mnav .brand{font-size:18px}.mnav .brand .mark{width:30px;height:30px;font-size:15px;border-radius:9px}
+.mnav .links a{font-size:15px;padding:8px 13px}
+.mnav .btn{padding:10px 18px;font-size:14.5px}
+.sec{padding:64px 22px}.sec.tight{padding:40px 22px}
+.tour{padding:28px 0}
+.hero2{grid-template-columns:.85fr 1.15fr;gap:40px;padding:64px 22px 72px;align-items:center}
+.hero2 h1{font-size:clamp(40px,5.2vw,64px)}
+.hero2 .lead{font-size:17px;max-width:40ch;margin-top:16px}
+.hero-wrap .mock{transform:perspective(1800px) rotateY(-5deg) rotateX(2deg) scale(1.04);transform-origin:center}
+.hero-wrap .mock:hover{transform:perspective(1800px) rotateY(0) rotateX(0) scale(1.04)}
+.mock.lg .body{padding:18px}.mock.lg .kp .v{font-size:28px}.mock.lg table{font-size:13px}.mock.lg td{padding:9px 8px}.mock.lg .seg2 span{font-size:12.5px;padding:6px 12px}
+.mock .seg2 span.on{background:rgba(226,167,94,.18);color:#fff;box-shadow:inset 0 0 0 1px rgba(226,167,94,.45)}
+.mock .kp .v small{color:var(--copper)}
+.mock .g1{color:#5EEAA0}.mock .g2{color:var(--copper)}
+.callout .big{color:var(--copper)}
+
+/* engines row: light weight, copper highlight, never wraps awkwardly */
+.engines{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:22px;font-size:13px;color:rgba(255,255,255,.55);font-weight:400}
+.engines .lab{margin-right:6px;letter-spacing:.06em;text-transform:uppercase;font-size:11px;font-weight:600;color:rgba(255,255,255,.4)}
+.engines span.e{font-family:var(--body);font-weight:500;font-size:13px;padding:5px 11px;border-radius:8px;border:1px solid rgba(226,167,94,.28);background:var(--copper-weak);color:#F3D5AE}
+.engines span.e b{color:var(--copper);font-weight:700;margin-right:5px}
+
+/* hero headline reveal, word by word */
+.hw{display:inline-block;opacity:0;transform:translateY(14px);animation:hw .7s cubic-bezier(.2,.7,.2,1) forwards}
+@keyframes hw{to{opacity:1;transform:none}}
+.btn-glow{position:relative;overflow:hidden}
+.btn-glow::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(79,70,229,.18),transparent);transform:skewX(-20deg);animation:shine 3.2s ease-in-out infinite}
+@keyframes shine{0%,60%{left:-60%}100%{left:130%}}
+.kick.copper{color:var(--copper)}
+.proof{margin-top:-34px;position:relative;z-index:2;box-shadow:var(--shadow)}
+.proof .n{background:linear-gradient(90deg,var(--accent),#8B86FF);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.flag{font-size:18px;margin-right:6px;vertical-align:-2px}
+@media(prefers-reduced-motion:reduce){.hw{animation:none;opacity:1;transform:none}.btn-glow::after{animation:none}}
+@media(max-width:900px){.hero2{grid-template-columns:1fr}.hero-wrap .mock{transform:none}.proof{margin-top:0}}
+/* per-word gradient so the animated spans keep their fill */
+.hw.hl{background:linear-gradient(90deg,#A5B4FC,#67E8F9);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.engines span.e{padding:4px 9px;font-size:12.5px}
+.engines .lab{font-size:10.5px}

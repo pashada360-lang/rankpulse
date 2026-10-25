@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Flag from "./Flag";
 
 /* A believable, animated preview of the real dashboard: regions switch, a scan runs,
    results land row by row, deltas appear. Everything shown is the kind of data the
@@ -12,9 +13,10 @@ const ROWS = [
   { k: "channel manager pricing",    m: [3, 2, 2, 2] },
 ];
 const REG = ["India", "United States", "UAE", "United Kingdom"];
+const CODE = ["IN", "US", "AE", "GB"];
 const MONTHS = ["Jul", "Aug", "Sep", "Oct"];
 
-export default function DashboardMock() {
+export default function DashboardMock({ size = "md" }) {
   const [reg, setReg] = useState(0);
   const [landed, setLanded] = useState(0);
   const [scan, setScan] = useState(true);
@@ -36,14 +38,14 @@ export default function DashboardMock() {
   const top3 = ROWS.slice(0, landed).filter(r => r.m[3] > 0 && r.m[3] <= 3).length;
 
   return (
-    <div className="mock float" aria-hidden="true">
+    <div className={"mock float" + (size === "lg" ? " lg" : "")} aria-hidden="true">
       <div className="bar">
         <i /><i /><i />
         <span className="url">rankpulse.app/dashboard · yourbrand.com</span>
         <span className="chip2"><i />{scan ? `Scanning ${REG[reg]} · ~4 min` : `Last scan Oct-26`}</span>
       </div>
       <div className="body">
-        <div className="seg2">{REG.map((r, i) => <span key={r} className={i === reg ? "on" : ""}>{r}</span>)}</div>
+        <div className="seg2">{REG.map((r, i) => <span key={r} className={i === reg ? "on" : ""} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}><Flag code={CODE[i]} size={14} />{r}</span>)}</div>
         <div className="kp">
           <div><div className="l">Ranking in top 10</div><div className="v">{ranking}<small>▲ {Math.max(0, ranking - 2)}</small></div></div>
           <div><div className="l">Top 3</div><div className="v">{top3}<small>▲ {Math.max(0, top3 - 1)}</small></div></div>
