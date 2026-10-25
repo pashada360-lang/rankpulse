@@ -1,76 +1,95 @@
-/* ═══ Product theme — the signed-in app wears the same skin as the landing page ═══
-   Applied by AppShell via html[data-theme="app"]. Dark ink ground, mesh glow, Outfit/DM Sans,
-   JetBrains Mono for every number, copper for the product's own figures. */
+/* ═══ Product theme — balanced ═══
+   Dark nav + a dark top band (.app-top) carry the landing page's identity: ink ground,
+   mesh glow, copper figures. The working area below is a soft light ground with white
+   cards, so tables are easy to read for long sessions. Applied via html[data-theme="app"]. */
 :root[data-theme="app"]{
-  --accent:#8B86FF; --accent-weak:rgba(139,134,255,.16); --accent-ink:#C7D2FE;
-  --ink:#ECEEF8; --ink-2:#AEB3CC; --ink-3:#7C8199;
-  --paper:#0F1424; --paper-2:#131A2E; --paper-3:#1B2238;
-  --rule:rgba(255,255,255,.08); --rule-2:rgba(255,255,255,.16);
-  --up:#5EEAA0; --up-bg:rgba(94,234,160,.12); --down:#FF7A6B; --down-bg:rgba(255,122,107,.12);
-  --warn:#E2A75E; --warn-bg:rgba(226,167,94,.14);
-  --copper:#E2A75E;
-  --shadow:0 1px 2px rgba(0,0,0,.5),0 16px 40px -20px rgba(0,0,0,.8);
-  color-scheme:dark;
+  --accent:#4F46E5; --accent-weak:#EEF0FE; --accent-ink:#3B32C4;
+  --ink:#15172B; --ink-2:#4B5069; --ink-3:#848AA3;
+  --paper:#FFFFFF; --paper-2:#F7F7FC; --paper-3:#EEEFF6;
+  --rule:#E4E5EF; --rule-2:#D2D4E3;
+  --up:#14905A; --up-bg:#E5F5ED; --down:#C9392D; --down-bg:#FBEBE9;
+  --warn:#B06F1C; --warn-bg:#FBF0E1;
+  --copper:#B8742A;
+  --shadow:0 1px 2px rgba(20,22,45,.05),0 10px 28px -16px rgba(20,22,45,.22);
 }
-:root[data-theme="app"] body{
-  background:
-    radial-gradient(900px 480px at 10% -10%,rgba(91,91,214,.28),transparent 60%),
-    radial-gradient(700px 420px at 95% 0%,rgba(34,211,238,.12),transparent 60%),
-    #07090F;
-  color:var(--ink);
-}
-:root[data-theme="app"] .nav{background:rgba(7,9,15,.72);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08)}
+:root[data-theme="app"] body{background:#F3F4F9;color:var(--ink)}
+
+/* ─── nav: dark, flows straight into the top band ─── */
+:root[data-theme="app"] .nav{background:#0A0D18;border-bottom:1px solid rgba(255,255,255,.07)}
 :root[data-theme="app"] .nav-in{padding:15px 22px}
-:root[data-theme="app"] .brand{color:#fff;font-size:17px}
-:root[data-theme="app"] .brand .mark{background:linear-gradient(135deg,#5B5BD6,#7C6CFF);box-shadow:0 4px 14px -4px rgba(91,91,214,.6)}
-:root[data-theme="app"] .btn-ghost{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.12);color:#fff}
-:root[data-theme="app"] .btn-ghost:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.2)}
-:root[data-theme="app"] .btn-primary{background:#fff;color:#0B0E1A}
-:root[data-theme="app"] .card,:root[data-theme="app"] .kpi,:root[data-theme="app"] .tablewrap{background:rgba(255,255,255,.035);border-color:rgba(255,255,255,.08);box-shadow:none}
-:root[data-theme="app"] th{background:rgba(255,255,255,.03);color:var(--ink-3)}
-:root[data-theme="app"] tbody tr.kw:hover td{background:rgba(255,255,255,.035)}
-:root[data-theme="app"] .kpi .v{font-family:var(--mono)}
-:root[data-theme="app"] .kpi .l{color:var(--ink-3)}
-:root[data-theme="app"] .pos{font-family:var(--mono)}
+:root[data-theme="app"] .nav .brand{color:#fff;font-size:17px}
+:root[data-theme="app"] .nav .brand .mark{background:linear-gradient(135deg,#5B5BD6,#7C6CFF);box-shadow:0 4px 14px -4px rgba(91,91,214,.6)}
+:root[data-theme="app"] .nav > .nav-in > span{color:rgba(255,255,255,.55)!important}
+:root[data-theme="app"] .nav .btn-ghost{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.14);color:#fff}
+:root[data-theme="app"] .nav .btn-ghost:hover{background:rgba(255,255,255,.11)}
+:root[data-theme="app"] .nav .scanchip{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.14);color:#fff}
+:root[data-theme="app"] .nav .scanchip .pulse{background:#67E8F9}
+:root[data-theme="app"] .nav .scanchip .pulse::after{border-color:#67E8F9}
+:root[data-theme="app"] .nav .scanchip.done .pulse{background:#5EEAA0}
+
+/* ─── the dark top band: banner, markets, KPIs ─── */
+.app-top{
+  --accent:#8B86FF; --accent-weak:rgba(139,134,255,.16); --accent-ink:#C7D2FE;
+  --ink:#ECEEF8; --ink-2:#B3B8D0; --ink-3:#8086A0;
+  --paper:rgba(255,255,255,.05); --paper-2:rgba(255,255,255,.04); --paper-3:rgba(255,255,255,.08);
+  --rule:rgba(255,255,255,.09); --rule-2:rgba(255,255,255,.16);
+  --up:#5EEAA0; --up-bg:rgba(94,234,160,.12); --down:#FF7A6B; --down-bg:rgba(255,122,107,.12);
+  --warn:#E2A75E; --warn-bg:rgba(226,167,94,.14); --copper:#E2A75E;
+  color:var(--ink);
+  background:
+    radial-gradient(800px 360px at 8% 0%,rgba(91,91,214,.32),transparent 62%),
+    radial-gradient(640px 320px at 96% 10%,rgba(34,211,238,.14),transparent 62%),
+    #0A0D18;
+  padding:2px 0 30px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+:root[data-theme="app"] .app-top .notice-bar{background:rgba(139,134,255,.09);border-color:rgba(139,134,255,.24);color:var(--ink)}
+.app-top .notice-bar b{color:#fff}
+.app-top .notice-bar a{color:#C7D2FE}
+:root[data-theme="app"] .app-top .kpi{background:rgba(255,255,255,.045);border-color:rgba(255,255,255,.09);box-shadow:none}
+.app-top .kpi .l{color:var(--ink-3)}
+.app-top .kpi .v{color:#fff}
+:root[data-theme="app"] .app-top .seg{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.09)}
+:root[data-theme="app"] .app-top .seg button{color:var(--ink-3)}
+:root[data-theme="app"] .app-top .seg button.on{background:rgba(226,167,94,.16);color:#fff;box-shadow:inset 0 0 0 1px rgba(226,167,94,.42)}
+.app-top .btn-primary{background:#fff;color:#0B0E1A}
+.app-top .btn-ghost{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.14);color:#fff}
+
+/* ─── light working area ─── */
+:root[data-theme="app"] .kpi .v,:root[data-theme="app"] .pos,:root[data-theme="app"] .mtable td{font-family:var(--mono)}
+:root[data-theme="app"] .kpis{margin-top:18px}
+:root[data-theme="app"] .tablewrap{background:#fff;border-color:var(--rule);box-shadow:var(--shadow)}
+:root[data-theme="app"] .card{background:#fff;border-color:var(--rule);box-shadow:var(--shadow)}
+:root[data-theme="app"] th{background:#FAFAFD;color:var(--ink-3)}
+:root[data-theme="app"] tbody tr.kw:hover td{background:#F7F7FC}
 :root[data-theme="app"] .pos.top{color:var(--up)} :root[data-theme="app"] .pos.mid{color:var(--copper)} :root[data-theme="app"] .pos.low{color:var(--ink-2)}
-:root[data-theme="app"] .delta.up{color:var(--up)} :root[data-theme="app"] .delta.down{color:var(--down)}
-:root[data-theme="app"] .seg{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.08)}
-:root[data-theme="app"] .seg button{color:var(--ink-3)}
-:root[data-theme="app"] .seg button.on{background:rgba(226,167,94,.16);color:#fff;box-shadow:inset 0 0 0 1px rgba(226,167,94,.4)}
-:root[data-theme="app"] .tabs{border-bottom-color:rgba(255,255,255,.08)}
-:root[data-theme="app"] .tab{color:var(--ink-3)} :root[data-theme="app"] .tab.on{color:#fff;border-bottom-color:var(--copper)}
-:root[data-theme="app"] .notice-bar{background:rgba(139,134,255,.08);border-color:rgba(139,134,255,.25)}
-:root[data-theme="app"] .notice-bar b{color:#fff}
-:root[data-theme="app"] .chip.ok{background:var(--up-bg);color:var(--up)} :root[data-theme="app"] .chip.err{background:var(--down-bg);color:var(--down)} :root[data-theme="app"] .chip.warn{background:var(--warn-bg);color:var(--warn)}
-:root[data-theme="app"] .pill.comm{background:rgba(139,134,255,.16);color:#C7D2FE} :root[data-theme="app"] .pill.prio{background:var(--up-bg);color:var(--up)} :root[data-theme="app"] .pill.long{background:rgba(255,255,255,.07);color:var(--ink-2)}
-:root[data-theme="app"] input,:root[data-theme="app"] textarea,:root[data-theme="app"] select{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1);color:#fff}
-:root[data-theme="app"] .drawer{background:#0F1424;border-left-color:rgba(255,255,255,.1)}
-:root[data-theme="app"] .rcell{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.08)}
-:root[data-theme="app"] .scanchip{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.12);color:#fff}
-:root[data-theme="app"] .scanchip .pulse{background:#67E8F9} :root[data-theme="app"] .scanchip .pulse::after{border-color:#67E8F9}
-:root[data-theme="app"] .scanchip.done .pulse{background:var(--up)}
-:root[data-theme="app"] .sovbar{background:rgba(255,255,255,.06)}
-:root[data-theme="app"] .sovname{color:var(--ink-2)} :root[data-theme="app"] .sovname.me{color:var(--copper)}
-:root[data-theme="app"] .spark span{background:var(--copper)} :root[data-theme="app"] .spark span.none{background:rgba(255,255,255,.12)}
-:root[data-theme="app"] .note.info{background:rgba(139,134,255,.08);border-color:rgba(139,134,255,.25);color:var(--ink)}
-:root[data-theme="app"] .note.bad{background:var(--down-bg);border-color:rgba(255,122,107,.35);color:var(--ink)}
-:root[data-theme="app"] .center .card{background:rgba(255,255,255,.04)}
-:root[data-theme="app"] .mtable td{font-family:var(--mono)}
+:root[data-theme="app"] .tabs{margin-top:26px}
+:root[data-theme="app"] .tab.on{color:var(--ink);border-bottom-color:var(--copper)}
+:root[data-theme="app"] .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(20,22,45,.08),inset 0 0 0 1px rgba(184,116,42,.35)}
+:root[data-theme="app"] .chip.warn{background:var(--warn-bg);color:var(--warn)}
+:root[data-theme="app"] .pill.comm{background:var(--accent-weak);color:var(--accent-ink)}
+:root[data-theme="app"] .pill.prio{background:var(--up-bg);color:var(--up)}
+:root[data-theme="app"] .pill.long{background:var(--paper-3);color:var(--ink-2)}
+:root[data-theme="app"] .sovname.me{color:var(--copper)}
+:root[data-theme="app"] .spark span{background:var(--copper)} :root[data-theme="app"] .spark span.none{background:var(--rule-2)}
+:root[data-theme="app"] .notice-bar{background:var(--accent-weak);border-color:color-mix(in srgb,var(--accent) 25%,var(--rule))}
+:root[data-theme="app"] .drawer{background:#fff}
+:root[data-theme="app"] .center .card{background:#fff}
 
 /* first-run: rows waiting for their first measurement shimmer instead of sitting blank */
-.skel{display:inline-block;height:12px;width:28px;border-radius:6px;background:linear-gradient(90deg,rgba(255,255,255,.06),rgba(255,255,255,.16),rgba(255,255,255,.06));background-size:200% 100%;animation:shim 1.6s linear infinite;vertical-align:middle}
+.skel{display:inline-block;height:12px;width:28px;border-radius:6px;background:linear-gradient(90deg,rgba(20,22,45,.06),rgba(20,22,45,.14),rgba(20,22,45,.06));background-size:200% 100%;animation:shim 1.6s linear infinite;vertical-align:middle}
+.app-top .skel{background:linear-gradient(90deg,rgba(255,255,255,.06),rgba(255,255,255,.16),rgba(255,255,255,.06));background-size:200% 100%}
 @keyframes shim{to{background-position:-200% 0}}
 .landed{animation:land .5s cubic-bezier(.2,.7,.2,1) both}
 @keyframes land{from{opacity:0;transform:translateY(-4px) scale(.96)}}
-.engine-seg button{display:inline-flex;align-items:center;gap:7px}
-.region-seg button{display:inline-flex;align-items:center;gap:7px}
-.pulse-row td{background:rgba(103,232,249,.05)!important}
-.welcome{background:linear-gradient(135deg,rgba(91,91,214,.22),rgba(34,211,238,.10));border:1px solid rgba(139,134,255,.3);border-radius:16px;padding:22px 24px;display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;margin-top:18px}
+.engine-seg button,.region-seg button{display:inline-flex;align-items:center;gap:7px}
+.pulse-row td{background:rgba(103,232,249,.07)!important}
+.welcome{background:linear-gradient(135deg,rgba(91,91,214,.24),rgba(34,211,238,.10));border:1px solid rgba(139,134,255,.3);border-radius:16px;padding:22px 24px;display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;margin-top:18px}
 .welcome h2{font-size:19px;color:#fff}
 .welcome p{color:var(--ink-2);margin:6px 0 0;font-size:14px;max-width:70ch}
 .steps-inline{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-.steps-inline span{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink-2);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:5px 11px}
-.steps-inline span.done{color:var(--up);border-color:rgba(94,234,160,.3)}
+.steps-inline span{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink-2);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:20px;padding:5px 11px}
+.steps-inline span.done{color:#5EEAA0;border-color:rgba(94,234,160,.3)}
 .steps-inline span.now{color:#fff;border-color:rgba(103,232,249,.4)}
 @media(max-width:800px){.welcome{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.skel,.landed{animation:none}}

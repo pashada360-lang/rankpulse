@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { sb, REGIONS, monthKey } from "../../lib/supabase";
 import { PLANS } from "../../lib/plans";
 import { ENGINE_LABELS, ENGINE_ORDER, STAGES } from "../../lib/ai-prompts";
+import { demoData } from "../../lib/demo";
 import AeoPanel from "../../components/AeoPanel";
 import AppShell from "../../components/AppShell";
 import EngineLogo, { EngineRow } from "../../components/EngineLogo";
@@ -46,6 +47,13 @@ export default function Dashboard() {
   const now = monthKey();
 
   const load = useCallback(async () => {
+    /* public sample account — /dashboard?demo=1 */
+    if (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("demo") === "1") {
+      const d = demoData();
+      setSite(d.site); setAcc(d.acc); setRegion(r => d.site.regions.includes(r) ? r : "IN");
+      setRows(d.rows); setRuns(d.runs); setPrompts(d.prompts); setCites(d.cites); setOpps(d.opps);
+      setSiteMonths(d.months.map(x => x.month)); setLoading(false); return;
+    }
     const { data: s } = await sb().auth.getSession();
     if (!s.session) return router.replace("/login");
     const [{ data: sites }, { data: a }] = await Promise.all([sb().from("sites").select("*").limit(1), sb().from("accounts").select("*").single()]);
@@ -188,7 +196,7 @@ export default function Dashboard() {
         <button className="btn btn-ghost" onClick={async () => { await sb().auth.signOut(); router.replace("/"); }}>Sign out</button>
       </div></nav>
 
-      <div className="wrap" style={{ paddingBottom: 72 }}>
+      <div className="app-top"><div className="wrap">
         {/* ───── first run: the product looks alive before the first reading lands ───── */}
         {!hasDone && (
           <div className="welcome">
@@ -228,7 +236,9 @@ export default function Dashboard() {
           <div className="kpi"><div className="l">Avg position</div><div className="v">{stats.avg}</div><div className="s">where ranking</div></div>
           {hasAeo && enginesPresent.length > 0 && <div className="kpi"><div className="l">AI citation rate</div><div className="v" style={{ color: "var(--accent-ink)" }}>{Math.round(engineStats(enginesPresent[0]).pct)}%</div><div className="s" style={{ display: "flex", alignItems: "center", gap: 5 }}><EngineLogo engine={enginesPresent[0]} size={13} dark />{ENGINE_LABELS[enginesPresent[0]]} · {lbl(aiMonth)}</div></div>}
         </div>
+      </div></div>
 
+      <div className="wrap" style={{ paddingBottom: 72 }}>
         <div className="tabs">
           <button className={"tab" + (view === "keywords" ? " on" : "")} onClick={() => setView("keywords")}>Keywords<span className="cnt">{rows.length}</span></button>
           <button className={"tab" + (view === "ai" ? " on" : "")} onClick={() => setView("ai")}>AI answers<span className="cnt">{enginesPresent.length ? enginesPresent.length + " engines" : hasAeo ? "pending" : "Growth"}</span></button>
