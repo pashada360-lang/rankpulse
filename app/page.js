@@ -5,10 +5,7 @@ import { sb, configured } from "../lib/supabase";
 import { PLANS, price, fmt, guessCurrency } from "../lib/plans";
 import { Nav, Footer, CTA, useReveal } from "../components/Site";
 import DashboardMock from "../components/DashboardMock";
-
-const Shot = ({ src, url, alt, cls = "" }) => (
-  <div className={"shot " + cls}><div className="chrome"><i /><i /><i /><span>{url}</span></div><img src={src} alt={alt} loading="lazy" /></div>
-);
+import { MockAI, MockOpps, MockFix } from "../components/Mocks";
 
 export default function Home() {
   const router = useRouter();
@@ -41,7 +38,7 @@ export default function Home() {
             <div className="engines"><span>Google</span><span>ChatGPT</span><span>Perplexity</span><span>Gemini</span><span>Claude</span></div>
           </div>
           <div className="hero-wrap">
-            <Shot cls="hero-shot" src="/img/shot-grid.png" url="app.rankpulse · dashboard" alt="RankPulse dashboard showing keyword positions by month across India, US, Middle East and Europe" />
+            <DashboardMock />
             <div className="callout c1"><span className="big">#1</span>hotel api aggregator · 4 markets</div>
             <div className="callout c2"><span className="big">8→23</span>top-3 placements in one month</div>
             <div className="callout c3"><span className="big">65%</span>cited by Perplexity</div>
@@ -79,41 +76,34 @@ export default function Home() {
       {/* ═══════════ PRODUCT TOUR ═══════════ */}
       <section className="sec" id="tour" style={{ background: "var(--paper-2)", maxWidth: "none" }}>
         <div style={{ maxWidth: 1180, margin: "0 auto" }}>
-          <div className="rv" style={{ textAlign: "center", maxWidth: 720, margin: "0 auto 20px" }}><span className="kick">The product</span><h2 style={{ margin: "0 auto" }}>Three tabs. Everything a marketing lead opens on the first of the month.</h2></div>
+          <div className="rv" style={{ textAlign: "center", maxWidth: 720, margin: "0 auto 20px" }}><span className="kick">The product</span><h2 style={{ margin: "0 auto" }}>Four views. Everything a marketing lead opens on the first of the month.</h2></div>
 
           <div className="tour">
             <div className="rv"><h3>Positions by month, by country, from the day you join.</h3>
-              <p>Your first scan becomes your baseline column. Every month after, a new column is added — nothing overwritten, nothing estimated. Click any keyword for every region, a position sparkline, and the month × region grid.</p>
-              <ul className="pts"><li>Page one only — position 11 and 80 both mean nobody found you</li><li>Failed checks marked unmeasured, never counted as a loss</li><li>Commercial, priority and long-tail groups so brand terms can't flatter your number</li></ul></div>
-            <div className="rv d1"><Shot src="/img/shot-grid.png" url="dashboard · keywords" alt="Keyword grid with monthly positions" /></div>
+              <p>Your first scan is your baseline column. Every month after, a new one is added — nothing overwritten, nothing estimated. Results stream in while the scan runs.</p>
+              <ul className="pts"><li>Page one only — 11 and 80 both mean nobody found you</li><li>Failed checks marked unmeasured, never counted as a loss</li><li>Click any keyword for every region and every month</li></ul></div>
+            <div className="rv d1"><DashboardMock /></div>
           </div>
 
           <div className="tour flip">
-            <div className="rv"><h3>Are ChatGPT, Perplexity, Gemini and Claude recommending you?</h3>
-              <p>We put real buyer questions — not keywords — to each engine and record whether your site is cited, where you rank among sources, and who gets cited instead. Broken down by funnel stage, so you see where you're invisible.</p>
-              <ul className="pts"><li>Citation rate per engine, compared on identical questions</li><li>Share of voice: which domains each engine trusts in your market</li><li>Priority fixes: pages that rank on Google but never get cited</li></ul></div>
-            <div className="rv d1"><Shot src="/img/shot-aeo.png" url="dashboard · AI answers" alt="AI answers tab with citation rate by engine and funnel stage" /></div>
+            <div className="rv"><h3>Is AI recommending you — or a competitor?</h3>
+              <p>Real buyer questions, not keywords, put to ChatGPT, Perplexity, Gemini and Claude every month. We record whether you're cited, where you rank among sources, and who gets cited instead.</p>
+              <ul className="pts"><li>Citation rate per engine on identical questions</li><li>Strength by buyer-journey stage — see where you're invisible</li><li>Share of voice: the domains each engine trusts in your market</li></ul></div>
+            <div className="rv d1"><MockAI /></div>
           </div>
 
           <div className="tour">
-            <div className="rv"><h3>Keywords you should be ranking for — and who holds them now.</h3>
-              <p>Every scan expands your list through Google Autocomplete, drops what you already track, and verifies the best against live page one. The result is a build list: the phrase, the page type to create, and the competitor to displace.</p>
-              <ul className="pts"><li>Real demand only — every phrase is one people actually type</li><li>Keywords you already rank for without a page, marked for a quick win</li><li>Who owns page one in your market, ranked by how many slots they hold</li></ul></div>
-            <div className="rv d1"><Shot src="/img/shot-opps.png" url="dashboard · opportunities" alt="Opportunities tab listing new keywords and who ranks for them" /></div>
+            <div className="rv"><h3>Keywords you should own — and who holds them now.</h3>
+              <p>Every scan expands your list from real searches, drops what you already track, and checks the best against live page one. You get a build list, not a wish list.</p>
+              <ul className="pts"><li>Real demand only — phrases people actually type</li><li>Quick wins: keywords you rank for without a page</li><li>Who owns page one, ranked by slots held</li></ul></div>
+            <div className="rv d1"><MockOpps /></div>
           </div>
-        </div>
-      </section>
 
-      {/* ═══════════ LIVE PREVIEW ═══════════ */}
-      <section className="band" style={{ padding: 0 }}>
-        <div className="orb b" style={{ top: "auto", bottom: -120, right: "30%" }} />
-        <div className="sec" style={{ color: "#fff" }}>
-          <div className="split">
-            <div className="rv"><span className="kick" style={{ color: "#A5B4FC" }}>Live, not a mock-up</span>
-              <h2 style={{ color: "#fff" }}>Results stream in while the scan runs.</h2>
-              <p className="sub" style={{ color: "rgba(255,255,255,.72)" }}>Add keywords, pick your countries, click run. Each position lands on the dashboard as it's measured, with the estimated time remaining in the corner. A full four-country scan of 150 keywords takes about 25 minutes. Then it repeats on its own, on the 1st of every month.</p>
-              <ul className="check" style={{ marginTop: 20 }}>{["Scan on demand the day you ship a change", "Automatic monthly runs, no reminders needed", "Trial accounts get a full scan on day one"].map(x => <li key={x} className="ok" style={{ color: "rgba(255,255,255,.82)" }}>{x}</li>)}</ul></div>
-            <div className="rv d1"><DashboardMock /></div>
+          <div className="tour flip">
+            <div className="rv"><h3>What to fix, in the order it pays back.</h3>
+              <p>Pages that rank on Google but never get cited come first — they're already written, just not answer-shaped. Then what to create, what to reclaim, what to defend. And the one robots.txt line that quietly blocks you.</p>
+              <ul className="pts"><li>Crawler-access audit on day one, every month after</li><li>Do / don't rules applied to your actual pages</li><li>Ranked by expected return, not alphabetically</li></ul></div>
+            <div className="rv d1"><MockFix /></div>
           </div>
         </div>
       </section>
