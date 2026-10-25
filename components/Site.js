@@ -1,12 +1,19 @@
 "use client";
 import { useEffect } from "react";
 
-export function useReveal() {
+/* Scroll reveal. Re-scans whenever `dep` changes so content rendered after an auth check
+   is still picked up; anything already in the viewport is shown immediately so nothing
+   can sit invisible if the observer misses it. */
+export function useReveal(dep) {
   useEffect(() => {
-    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: .12, rootMargin: "0px 0px -40px 0px" });
-    document.querySelectorAll(".rv").forEach(el => io.observe(el));
-    return () => io.disconnect();
-  }, []);
+    const els = [...document.querySelectorAll(".rv:not(.in)")];
+    if (!els.length) return;
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: .08, rootMargin: "0px 0px -30px 0px" });
+    const vh = window.innerHeight;
+    els.forEach(el => { const r = el.getBoundingClientRect(); if (r.top < vh && r.bottom > 0) el.classList.add("in"); else io.observe(el); });
+    const safety = setTimeout(() => els.forEach(el => el.classList.add("in")), 2500);
+    return () => { io.disconnect(); clearTimeout(safety); };
+  }, [dep]);
 }
 
 export function Nav({ dark = false }) {

@@ -7,6 +7,11 @@
            node worker/run.mjs --monthly  — also queue a run for every active site */
 import { createClient } from "@supabase/supabase-js";
 import { execFileSync } from "child_process";
+import { runAeo } from "./aeo.mjs";
+import { runOpps } from "./opps.mjs";
+
+/* which AI engines a plan unlocks; Claude needs ANTHROPIC_API_KEY as well */
+const AI_BY_PLAN = { trial: ["chatgpt", "google"], starter: [], growth: ["chatgpt", "perplexity", "gemini", "claude", "google"], scale: ["chatgpt", "perplexity", "gemini", "claude", "google"] };
 
 const db = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY, {
   auth: { persistSession: false },
@@ -139,8 +144,26 @@ async function processRun(run) {
     note: errors ? `${errors} still unmeasured` : null,
     finished_at: new Date(),
   }).eq("id", run.id);
-
   console.log(`✔ ${site.domain}: ${measured} measured, ${ranking} ranking, ${errors} unmeasured`);
+
+  /* ── AI answers (plan-gated) ── */
+  const { data: acc } = await db.from("accounts").select("plan").eq("id", site.account_id).single();
+  const engines = (AI_BY_PLAN[acc?.plan] || []).filter(e => e !== "claude" || process.env.ANTHROPIC_API_KEY);
+  const cc = CC[site.regions[0]] || "us";
+  if (engines.length && site.ai_enabled !== false) {
+    await db.from("runs").update({ ai_status: "running" }).eq("id", run.id);
+    try {
+      await runAeo({ db, site, month: run.month, cc, engines });
+      await db.from("runs").update({ ai_status: "done" }).eq("id", run.id);
+    } catch (e) { console.error("   ai scan failed:", e.message); await db.from("runs").update({ ai_status: "failed" }).eq("id", run.id); }
+  } else await db.from("runs").update({ ai_status: "skipped" }).eq("id", run.id);
+
+  /* ── keyword opportunities (every plan) ── */
+  await db.from("runs").update({ opps_status: "running" }).eq("id", run.id);
+  try {
+    await runOpps({ db, site, month: run.month, cc, limit: acc?.plan === "trial" ? 20 : 40 });
+    await db.from("runs").update({ opps_status: "done" }).eq("id", run.id);
+  } catch (e) { console.error("   opportunities failed:", e.message); await db.from("runs").update({ opps_status: "failed" }).eq("id", run.id); }
 }
 
 /* ───────── main ───────── */

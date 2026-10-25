@@ -2,12 +2,14 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { sb, REGIONS } from "../../lib/supabase";
+import { defaultPrompts } from "../../lib/ai-prompts";
 
 export default function Onboarding() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [domain, setDomain] = useState("");
   const [brand, setBrand] = useState("");
+  const [category, setCategory] = useState("");
   const [regions, setRegions] = useState(["IN", "US"]);
   const [kw, setKw] = useState("");
   const [busy, setBusy] = useState(false);
@@ -38,9 +40,14 @@ export default function Onboarding() {
         account_id: acc.id,
         domain: clean(domain),
         brand_word: (brand || clean(domain).split(".")[0]).trim().toLowerCase(),
+        category: category.trim() || null,
         regions,
       }).select().single();
       if (se) throw se;
+
+      /* seed buyer questions for AI-answer tracking; the customer can edit them later */
+      const seeds = defaultPrompts(brand || clean(domain).split(".")[0], category);
+      await sb().from("ai_prompts").insert(seeds.map(x => ({ site_id: site.id, prompt: x.prompt, stage: x.stage })));
 
       const rows = phrases.slice(0, limit).map(p => ({ site_id: site.id, phrase: p.toLowerCase() }));
       if (rows.length) {
@@ -85,6 +92,11 @@ export default function Onboarding() {
               <label>Brand name as it appears in text <span style={{ fontWeight: 400, color: "var(--ink-3)" }}>(optional)</span></label>
               <input value={brand} onChange={e => setBrand(e.target.value)} placeholder="Acme" />
               <div className="hint">Used to spot mentions of you in AI answers.</div>
+            </div>
+            <div className="field">
+              <label>What do you sell, in a few words?</label>
+              <input value={category} onChange={e => setCategory(e.target.value)} placeholder="hotel booking API · payroll software · dental CRM" />
+              <div className="hint">We use this to write the questions buyers ask AI assistants about your category.</div>
             </div>
             <button className="btn btn-primary" style={{ width: "100%" }}
               disabled={!clean(domain).includes(".")}

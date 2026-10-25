@@ -1,6 +1,7 @@
 import "./globals.css";
 import "./tracker.css";
 import "./site.css";
+import "./landing.css";
 import { Outfit, DM_Sans, JetBrains_Mono } from "next/font/google";
 
 const outfit = Outfit({ subsets: ["latin"], weight: ["500", "600", "700"], variable: "--font-outfit", display: "swap" });

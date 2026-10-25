@@ -42,6 +42,8 @@ jobs:
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           BRIGHTDATA_KEY: ${{ secrets.BRIGHTDATA_KEY }}
           BRIGHTDATA_ZONE: ${{ secrets.BRIGHTDATA_ZONE }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          NODE_OPTIONS: --max-old-space-size=4096
           MONTHLY: ${{ github.event.schedule == '30 2 1 * *' || inputs.monthly }}
         run: |
           if [ "$MONTHLY" = "true" ]; then
